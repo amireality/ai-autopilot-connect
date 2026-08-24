@@ -25,11 +25,12 @@ Two large buttons: **Connect LinkedIn** and **Connect X (Twitter)**. No niche, n
 
 ## The MCP server (two tools)
 
-**`get_daily_paper_content`** — calls the n8n webhook, returns today's raw paper text straight to the caller's AI. Nothing is summarised or interpreted on our side. Until you supply the webhook URL it reads a server secret placeholder and returns a clear "paper source not configured yet" error instead of failing silently.
+**`get_daily_paper_content`** — its only job is to fetch today's paper PDF/text from the master OneDrive (via the n8n webhook) and hand the raw content to the caller's AI. No summarising, curating, or writing on our side — the user's AI reads it and drafts posts about current events in their niche. Until you supply the webhook URL it reads a server secret placeholder and returns a clear "paper source not configured yet" error instead of failing silently.
 
-**`publish_to_social`** — arguments `platform` and `post_content`. Writes one row into `publishing_queue` owned by the signed-in user and returns the queued row id. It never touches tokens and never posts directly; n8n watches the table and publishes.
+**`publish_to_social`** — arguments `platform` and `post_content`. Fully independent of the paper tool: the user can just chat with their AI, have it write a post from scratch, and call this tool directly. It writes one row into `publishing_queue` owned by the signed-in user and returns the queued row id. It never touches tokens and never posts directly; n8n watches the table and publishes.
 
 Both tools run as the signed-in user, so one user can never read or queue posts for another.
+
 
 ## Data model
 
