@@ -112,7 +112,7 @@ function Consent() {
           Connect {clientName} to your account
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          {clientName} will be able to read the daily paper and queue posts to your connected social
+          {clientName} will be able to queue posts to your connected social
           accounts while you are signed in.
         </p>
 

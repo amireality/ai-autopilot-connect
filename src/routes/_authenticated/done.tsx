@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_authenticated/done")({
       { title: "You're all set — setupr automate" },
       {
         name: "description",
-        content: "Setup is complete. Return to your AI client and ask it to read today's paper.",
+        content: "Setup is complete. Return to your AI client and ask it to draft a post.",
       },
       { property: "og:title", content: "You're all set — setupr automate" },
       { property: "og:description", content: "Return to your AI client to begin." },
@@ -36,9 +36,8 @@ function Done() {
         You're all set. Return to your AI to begin.
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-        Try asking it: <span className="text-foreground">"Read today's paper and draft a LinkedIn
-        post about what matters in my niche."</span> Or skip the paper entirely and ask it to publish
-        something you wrote together.
+        Try asking it: <span className="text-foreground">"Draft a LinkedIn post about what matters
+        in my niche this week and publish it."</span>
       </p>
 
       <CopyableValue className="mt-10" label="Your MCP link" value={mcpUrl} />
