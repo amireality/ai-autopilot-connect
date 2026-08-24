@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Check, Copy } from "lucide-react";
 
+const MCP_ORIGIN = "https://blew.setupr.com";
+
 export function useMcpUrl() {
   const [url, setUrl] = useState("");
   useEffect(() => {
-    setUrl(new URL("/mcp", window.location.origin).toString());
+    setUrl(new URL("/mcp", MCP_ORIGIN).toString());
   }, []);
   return url;
 }
