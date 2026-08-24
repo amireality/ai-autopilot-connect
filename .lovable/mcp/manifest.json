@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "sdk_version": "0.28.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://vcjovjksjxptwxvblzlf.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "setupr-automate",
+      "version": "0.1.0",
+      "title": "setupr automate"
+    },
+    "tools": [
+      {
+        "name": "get_daily_paper_content",
+        "title": "Get daily paper content",
+        "description": "Fetch today's newspaper (PDF text) from the master OneDrive archive and return the raw content. Read it yourself to find stories worth posting about — this tool never summarises or writes.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "publish_to_social",
+        "title": "Publish to social",
+        "description": "Queue a finished post for publishing to the signed-in user's X or LinkedIn account. Works with or without the daily paper — pass any content you have written.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "platform": {
+              "type": "string",
+              "enum": [
+                "x",
+                "linkedin"
+              ],
+              "description": "Target platform: 'x' or 'linkedin'."
+            },
+            "post_content": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 5000,
+              "description": "The finished post text, exactly as it should be published."
+            }
+          },
+          "required": [
+            "platform",
+            "post_content"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
