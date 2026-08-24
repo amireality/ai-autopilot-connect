@@ -19,7 +19,7 @@
       {
         "name": "publish_to_social",
         "title": "Publish to social",
-        "description": "Queue a finished post for publishing to the signed-in user's X or LinkedIn account. Works with or without the daily paper — pass any content you have written.",
+        "description": "Queue a finished post for publishing to the signed-in user's X or LinkedIn account. Pass any content you have written.",
         "annotations": {
           "readOnlyHint": false,
           "destructiveHint": false,

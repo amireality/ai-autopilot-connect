@@ -77,17 +77,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "setupr automate — Agentic News MCP" },
+      { title: "setupr automate — Social Publishing MCP" },
       {
         name: "description",
-        content:
-          "Connect your AI client to the daily paper and publish to X and LinkedIn through one MCP link.",
+        content: "Connect your AI client and publish to X and LinkedIn through one MCP link.",
       },
-      { property: "og:title", content: "setupr automate — Agentic News MCP" },
+      { property: "og:title", content: "setupr automate — Social Publishing MCP" },
       {
         property: "og:description",
-        content:
-          "Connect your AI client to the daily paper and publish to X and LinkedIn through one MCP link.",
+        content: "Connect your AI client and publish to X and LinkedIn through one MCP link.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
