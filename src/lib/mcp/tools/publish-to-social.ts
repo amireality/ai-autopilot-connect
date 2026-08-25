@@ -76,7 +76,8 @@ export default defineTool({
         const { data: publicUrlData } = supabase.storage.from('social_images').getPublicUrl(filename);
         image_url = publicUrlData.publicUrl;
       } catch (err) {
-        return { content: [{ type: "text", text: `Failed to process image: ${err.message}` }], isError: true };
+        const message = err instanceof Error ? err.message : String(err);
+        return { content: [{ type: "text", text: `Failed to process image: ${message}` }], isError: true };
       }
     }
 
