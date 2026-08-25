@@ -19,7 +19,7 @@
       {
         "name": "publish_to_social",
         "title": "Publish to social",
-        "description": "Queue a finished post for publishing to the signed-in user's X or LinkedIn account. Pass any content you have written.",
+        "description": "Queue a finished post for publishing to the signed-in user's X or LinkedIn account. Can accept a base64 image and a scheduled time.",
         "annotations": {
           "readOnlyHint": false,
           "destructiveHint": false,
@@ -41,6 +41,18 @@
               "minLength": 1,
               "maxLength": 5000,
               "description": "The finished post text, exactly as it should be published."
+            },
+            "image_base64": {
+              "type": "string",
+              "description": "Optional. The raw base64 string of the image file (without the data:image prefix)."
+            },
+            "image_mime_type": {
+              "type": "string",
+              "description": "Optional. The mime type of the image, e.g. 'image/png' or 'image/jpeg'."
+            },
+            "scheduled_for": {
+              "type": "string",
+              "description": "Optional. The ISO 8601 timestamp for when this post should be published. Defaults to now if omitted."
             }
           },
           "required": [

@@ -19,10 +19,12 @@ export type Database = {
           created_at: string
           external_post_id: string | null
           id: string
+          image_url: string | null
           last_error: string | null
           platform: Database["public"]["Enums"]["social_platform"]
           post_content: string
           published_at: string | null
+          scheduled_for: string | null
           status: Database["public"]["Enums"]["publish_status"]
           updated_at: string
           user_id: string
@@ -31,10 +33,12 @@ export type Database = {
           created_at?: string
           external_post_id?: string | null
           id?: string
+          image_url?: string | null
           last_error?: string | null
           platform: Database["public"]["Enums"]["social_platform"]
           post_content: string
           published_at?: string | null
+          scheduled_for?: string | null
           status?: Database["public"]["Enums"]["publish_status"]
           updated_at?: string
           user_id: string
@@ -43,10 +47,12 @@ export type Database = {
           created_at?: string
           external_post_id?: string | null
           id?: string
+          image_url?: string | null
           last_error?: string | null
           platform?: Database["public"]["Enums"]["social_platform"]
           post_content?: string
           published_at?: string | null
+          scheduled_for?: string | null
           status?: Database["public"]["Enums"]["publish_status"]
           updated_at?: string
           user_id?: string
