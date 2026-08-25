@@ -1,21 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, FileText, Send, Terminal } from "lucide-react";
+import { ArrowRight, Send, Terminal } from "lucide-react";
 import { CopyableValue, useMcpUrl } from "@/components/McpLink";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "setupr automate — Connect your AI to the daily news" },
+      { title: "setupr automate — Publish to social from your AI" },
       {
         name: "description",
         content:
-          "A zero-UI automation hub. Your AI reads the daily paper and publishes to X and LinkedIn through one MCP link. No dashboards, no AI bills.",
+          "A zero-UI automation hub. Your AI writes the post, we publish it to X and LinkedIn through one MCP link. No dashboards, no AI bills.",
       },
-      { property: "og:title", content: "setupr automate — Connect your AI to the daily news" },
+      { property: "og:title", content: "setupr automate — Publish to social from your AI" },
       {
         property: "og:description",
-        content:
-          "One MCP link connects Claude, ChatGPT or Codex to the daily paper and your social accounts.",
+        content: "One MCP link connects Claude, ChatGPT or Codex to your X and LinkedIn accounts.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -40,12 +39,12 @@ function Landing() {
           Model Context Protocol
         </p>
         <h1 className="mt-5 text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl">
-          Connect your AI to the daily news and automate your social presence.
+          Let your AI publish straight to X and LinkedIn.
         </h1>
         <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
-          One link. Your own AI client reads today's newspaper, decides what matters in your niche,
-          writes the post, and ships it to X and LinkedIn. There is no dashboard to learn and no AI
-          bill to pay — your assistant does the thinking, we move the bytes.
+          One link. Your own AI client writes the post, then ships it to X and LinkedIn. There is no
+          dashboard to learn and no AI bill to pay — your assistant does the thinking, we move the
+          bytes.
         </p>
       </section>
 
@@ -57,18 +56,14 @@ function Landing() {
         </p>
       </section>
 
-      <section className="mt-16 grid gap-4 sm:grid-cols-2">
-        <ToolCard
-          icon={<FileText className="size-4 text-primary" />}
-          name="get_daily_paper_content"
-          body="Pulls today's paper straight from our OneDrive archive and hands the raw text to your AI. Nothing is summarised on our side."
-        />
+      <section className="mt-16">
         <ToolCard
           icon={<Send className="size-4 text-primary" />}
           name="publish_to_social"
-          body="Queues any finished draft to X or LinkedIn. Works with the paper, or from a post your AI wrote from scratch."
+          body="Queues any finished draft to X or LinkedIn and hands it to our publisher immediately."
         />
       </section>
+
 
       <section className="mt-20">
         <h2 className="text-lg font-semibold tracking-tight">Add it to your client</h2>

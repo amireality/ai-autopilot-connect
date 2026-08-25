@@ -1,6 +1,22 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
-import { supabaseForUser } from "../supabase";
+import { runtimeEnv, supabaseForUser } from "../supabase";
+
+/** Notify the n8n publisher that a new row landed in the queue. Never blocks the tool result. */
+async function notifyPublisher(payload: Record<string, unknown>): Promise<string | null> {
+  const url = runtimeEnv("N8N_PUBLISH_WEBHOOK_URL")?.trim();
+  if (!url) return "publisher webhook not configured";
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    return res.ok ? null : `publisher webhook returned ${res.status}`;
+  } catch (err) {
+    return err instanceof Error ? err.message : "publisher webhook request failed";
+  }
+}
 
 export default defineTool({
   name: "publish_to_social",
@@ -82,14 +98,28 @@ export default defineTool({
       return { content: [{ type: "text", text: error.message }], isError: true };
     }
 
+    const notifyError = await notifyPublisher({
+      queue_id: data.id,
+      user_id: ctx.getUserId(),
+      platform,
+      post_content,
+      image_url,
+      scheduled_for: scheduleTime,
+      status: data.status,
+      created_at: data.created_at,
+    });
+
+    const label = platform === "x" ? "X" : "LinkedIn";
     return {
       content: [
         {
           type: "text",
-          text: `Queued for ${platform === "x" ? "X" : "LinkedIn"} at ${scheduleTime}. Queue id: ${data.id}. ${image_url ? 'Image attached.' : 'No image attached.'}`,
+          text: notifyError
+            ? `Queued for ${label} at ${scheduleTime} (queue id: ${data.id}), but the publisher could not be notified directly (${notifyError}). It will still be picked up from the queue. ${image_url ? 'Image attached.' : 'No image attached.'}`
+            : `Queued for ${label} at ${scheduleTime} and handed to the publisher. Queue id: ${data.id}. ${image_url ? 'Image attached.' : 'No image attached.'}`,
         },
       ],
-      structuredContent: { queued: data },
+      structuredContent: { queued: data, publisher_notified: !notifyError },
     };
   },
 });
