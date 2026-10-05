@@ -39,21 +39,26 @@ export default defineTool({
       .string()
       .optional()
       .describe("Optional. The mime type of the image, e.g. 'image/png' or 'image/jpeg'."),
+    image_url: z
+      .string()
+      .url()
+      .optional()
+      .describe("Optional. A direct public URL to an image. Use this if the user provides a link instead of uploading a file."),
     scheduled_for: z
       .string()
       .optional()
       .describe("Optional. The ISO 8601 timestamp for when this post should be published. Defaults to now if omitted."),
   },
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
-  handler: async ({ platform, post_content, image_base64, image_mime_type, scheduled_for }, ctx) => {
+  handler: async ({ platform, post_content, image_base64, image_mime_type, image_url, scheduled_for }, ctx) => {
     if (!ctx.isAuthenticated()) {
       return { content: [{ type: "text", text: "Not authenticated." }], isError: true };
     }
 
     const supabase = supabaseForUser(ctx);
-    let image_url = null;
+    let final_image_url = image_url || null;
 
-    // Handle Image Upload if provided
+    // Handle Image Upload if provided via base64
     if (image_base64 && image_mime_type) {
       try {
         const buffer = Buffer.from(image_base64, 'base64');
@@ -74,7 +79,7 @@ export default defineTool({
 
         // Get the permanent public URL
         const { data: publicUrlData } = supabase.storage.from('social_images').getPublicUrl(filename);
-        image_url = publicUrlData.publicUrl;
+        final_image_url = publicUrlData.publicUrl;
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         return { content: [{ type: "text", text: `Failed to process image: ${message}` }], isError: true };
@@ -89,7 +94,7 @@ export default defineTool({
         user_id: ctx.getUserId(), 
         platform, 
         post_content,
-        image_url,
+        image_url: final_image_url,
         scheduled_for: scheduleTime
       })
       .select("id, platform, status, created_at, scheduled_for")
@@ -104,7 +109,7 @@ export default defineTool({
       user_id: ctx.getUserId(),
       platform,
       post_content,
-      image_url,
+      image_url: final_image_url,
       scheduled_for: scheduleTime,
       status: data.status,
       created_at: data.created_at,
