@@ -52,10 +52,33 @@ export default defineTool({
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
   handler: async ({ platform, post_content, image_base64, image_mime_type, image_url, scheduled_for }, ctx) => {
     if (!ctx.isAuthenticated()) {
-      return { content: [{ type: "text", text: "Not authenticated." }], isError: true };
+      return { content: [{ type: "text", text: "Not authenticated. Please log in at https://app.setupr.io/login" }], isError: true };
     }
 
     const supabase = supabaseForUser(ctx);
+    const userId = ctx.getUserId();
+
+    // 1. Check User's Quota
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("available_quota")
+      .eq("id", userId)
+      .single();
+
+    if (profileError || !profile) {
+      return { content: [{ type: "text", text: "Could not retrieve your user profile or quota." }], isError: true };
+    }
+
+    if (profile.available_quota <= 0) {
+      return { 
+        content: [{ 
+          type: "text", 
+          text: `Your quota is over (${profile.available_quota} posts remaining). Please upgrade to continue posting.\n\n[Click here to upgrade your plan](/upgrade)` 
+        }], 
+        isError: true 
+      };
+    }
+
     let final_image_url = image_url || null;
 
     // Handle Image Upload if provided via base64
@@ -103,6 +126,9 @@ export default defineTool({
     if (error) {
       return { content: [{ type: "text", text: error.message }], isError: true };
     }
+
+    // 2. Deduct Quota
+    await supabase.rpc('decrement_quota', { user_id: userId });
 
     const notifyError = await notifyPublisher({
       queue_id: data.id,
