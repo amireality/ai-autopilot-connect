@@ -50,6 +50,11 @@
               "type": "string",
               "description": "Optional. The mime type of the image, e.g. 'image/png' or 'image/jpeg'."
             },
+            "image_url": {
+              "type": "string",
+              "format": "uri",
+              "description": "Optional. A direct public URL to an image. Use this if the user provides a link instead of uploading a file."
+            },
             "scheduled_for": {
               "type": "string",
               "description": "Optional. The ISO 8601 timestamp for when this post should be published. Defaults to now if omitted."
