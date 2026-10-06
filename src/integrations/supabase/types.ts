@@ -83,6 +83,42 @@ export type Database = {
         }
         Relationships: []
       }
+      razorpay_orders: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          order_id: string
+          paid_at: string | null
+          payment_id: string | null
+          quota_added: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          order_id: string
+          paid_at?: string | null
+          payment_id?: string | null
+          quota_added?: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          order_id?: string
+          paid_at?: string | null
+          payment_id?: string | null
+          quota_added?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       social_connections: {
         Row: {
           account_handle: string | null
@@ -127,7 +163,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      fulfill_razorpay_order: {
+        Args: { _order_id: string; _payment_id: string }
+        Returns: number
+      }
     }
     Enums: {
       connection_status: "not_connected" | "pending" | "connected" | "error"
