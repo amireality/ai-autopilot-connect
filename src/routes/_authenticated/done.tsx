@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Terminal } from "lucide-react";
+import { Check, Terminal, Sparkles } from "lucide-react";
 import { CopyableValue, useMcpUrl } from "@/components/McpLink";
 
 export const Route = createFileRoute("/_authenticated/done")({
@@ -42,12 +42,21 @@ function Done() {
 
       <CopyableValue className="mt-10" label="Your MCP link" value={mcpUrl} />
 
-      <Link
-        to="/setup"
-        className="mt-8 text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
-      >
-        Manage connected accounts
-      </Link>
+      <div className="mt-8 flex items-center justify-between text-xs text-muted-foreground">
+        <Link
+          to="/setup"
+          className="underline underline-offset-4 hover:text-foreground transition-colors"
+        >
+          Manage connected accounts
+        </Link>
+        <Link
+          to="/upgrade"
+          className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
+        >
+          <Sparkles className="size-3" />
+          Plan & Quota
+        </Link>
+      </div>
     </main>
   );
 }
