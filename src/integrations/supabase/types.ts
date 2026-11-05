@@ -163,6 +163,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_subscription_quota: {
+        Args: { new_tier: string; quota_to_add: number; target_user_id: string }
+        Returns: undefined
+      }
       fulfill_razorpay_order: {
         Args: { _order_id: string; _payment_id: string }
         Returns: number
