@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Send, Terminal } from "lucide-react";
 import { CopyableValue, useMcpUrl } from "@/components/McpLink";
 
@@ -29,9 +29,14 @@ function Landing() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6 py-16 sm:py-24">
-      <header className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.28em] text-muted-foreground">
-        <Terminal className="size-3.5 text-primary" />
-        setupr automate
+      <header className="flex items-center justify-between font-mono text-xs uppercase tracking-[0.28em] text-muted-foreground">
+        <span className="flex items-center gap-2">
+          <Terminal className="size-3.5 text-primary" />
+          setupr automate
+        </span>
+        <Link to="/upgrade" className="transition-colors hover:text-foreground">
+          Pricing
+        </Link>
       </header>
 
       <section className="mt-16 sm:mt-24">
