@@ -20,6 +20,8 @@ import { Route as AuthenticatedDoneRouteImport } from './routes/_authenticated/d
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as ApiAuthCallbackXRouteImport } from './routes/api/auth/callback/x'
+import { Route as ApiAuthCallbackLinkedinRouteImport } from './routes/api/auth/callback/linkedin'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -90,6 +92,12 @@ export interface FileRoutesByFullPath {
   '/setup': typeof AuthenticatedSetupRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/auth/callback/x': typeof ApiAuthCallbackXRoute
+  '/api/auth/callback/linkedin': typeof ApiAuthCallbackLinkedinRoute
+  '/api/auth/callback/x': typeof ApiAuthCallbackXRoute
+  '/api/auth/callback/linkedin': typeof ApiAuthCallbackLinkedinRoute
+  '/api/auth/callback/x': typeof ApiAuthCallbackXRoute
+  '/api/auth/callback/linkedin': typeof ApiAuthCallbackLinkedinRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -167,6 +175,8 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiAuthCallbackXRoute: typeof ApiAuthCallbackXRoute
+  ApiAuthCallbackLinkedinRoute: typeof ApiAuthCallbackLinkedinRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -241,6 +251,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/callback/x': {
+      id: '/api/auth/callback/x'
+      path: '/api/auth/callback/x'
+      fullPath: '/api/auth/callback/x'
+      preLoaderRoute: typeof ApiAuthCallbackXRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/callback/linkedin': {
+      id: '/api/auth/callback/linkedin'
+      path: '/api/auth/callback/linkedin'
+      fullPath: '/api/auth/callback/linkedin'
+      preLoaderRoute: typeof ApiAuthCallbackLinkedinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -275,6 +299,8 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiAuthCallbackXRoute: ApiAuthCallbackXRoute,
+  ApiAuthCallbackLinkedinRoute: ApiAuthCallbackLinkedinRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

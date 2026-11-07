@@ -14,25 +14,19 @@ export const listSocialConnections = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
-export const upsertSocialConnection = createServerFn({ method: "POST" })
+export const getSocialConnectUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { platform: SocialPlatform }) => {
-    if (input.platform !== "x" && input.platform !== "linkedin") {
-      throw new Error("Unsupported platform");
-    }
-    return input;
-  })
+  .inputValidator((input: { platform: SocialPlatform }) => input)
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("social_connections").upsert(
-      {
-        user_id: context.userId,
-        platform: data.platform,
-        status: "connected",
-      },
-      { onConflict: "user_id,platform" },
-    );
-    if (error) throw new Error(error.message);
-    return { ok: true };
+    const { getTwitterAuthUrl, getLinkedInAuthUrl } = await import("./oauth.server");
+    if (data.platform === "x") {
+      const url = getTwitterAuthUrl(context.userId);
+      return { url };
+    } else if (data.platform === "linkedin") {
+      const url = getLinkedInAuthUrl(context.userId);
+      return { url };
+    }
+    throw new Error("Unsupported platform");
   });
 
 export const removeSocialConnection = createServerFn({ method: "POST" })
