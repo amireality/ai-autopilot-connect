@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowRight, Check, Linkedin, Terminal, X as XIcon, Loader2, AlertCircle } from "lucide-react";
+import { ArrowRight, Check, Linkedin, X as XIcon, Loader2, AlertCircle, Sparkles, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import {
   listSocialConnections,
@@ -10,6 +10,9 @@ import {
   type SocialPlatform,
 } from "@/lib/social.functions";
 import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/setup")({
   head: () => ({
@@ -77,105 +80,121 @@ function Setup() {
   const connectedCount = connections.filter((c) => c.status === "connected").length;
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col px-6 py-16 sm:py-24">
-      <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.28em] text-muted-foreground">
-        <Terminal className="size-3.5 text-primary" />
-        blew by setupr
-      </div>
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <Navbar />
 
-      <h1 className="mt-10 text-2xl font-semibold tracking-tight">Connect your social accounts</h1>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-        Connect your personal or brand X and LinkedIn profiles. Once connected, your AI autopilot will publish directly to your feed.
-      </p>
-
-      {/* Success Notification */}
-      {connectedParam ? (
-        <div className="mt-6 flex items-center gap-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-600 dark:text-emerald-400">
-          <Check className="size-4 shrink-0" />
-          <span>
-            Successfully connected {connectedParam.toUpperCase()}{" "}
-            {handleParam ? <strong>({decodeURIComponent(handleParam)})</strong> : ""}!
-          </span>
+      <main className="flex-1 mx-auto flex w-full max-w-xl flex-col px-6 py-12 md:py-20">
+        <div className="flex items-center gap-2 mb-2">
+          <Badge variant="outline" className="text-xs font-normal border-primary/20 text-primary bg-primary/5">
+            Step 1 of 2 • Social Authentication
+          </Badge>
         </div>
-      ) : null}
 
-      {/* Error Notification */}
-      {errorParam ? (
-        <div className="mt-6 flex items-center gap-2.5 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive">
-          <AlertCircle className="size-4 shrink-0" />
-          <span>Failed to connect: {decodeURIComponent(errorParam)}</span>
-        </div>
-      ) : null}
+        <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight">Connect your social accounts</h1>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          Authorize your personal or brand X and LinkedIn profiles. Once connected, your AI assistant publishes directly to your feed.
+        </p>
 
-      <div className="mt-8 space-y-3">
-        {PLATFORMS.map((platform) => {
-          const conn = connections.find((c) => c.platform === platform.id);
-          const isConnected = conn?.status === "connected";
-          const isLoading = connectingPlatform === platform.id || disconnectMutation.isPending;
+        {/* Success Notification */}
+        {connectedParam ? (
+          <div className="mt-6 flex items-center gap-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3.5 text-xs text-emerald-600 dark:text-emerald-400">
+            <Check className="size-4 shrink-0" />
+            <span>
+              Successfully connected {connectedParam.toUpperCase()}{" "}
+              {handleParam ? <strong>({decodeURIComponent(handleParam)})</strong> : ""}!
+            </span>
+          </div>
+        ) : null}
 
-          return (
-            <div
-              key={platform.id}
-              className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-5 transition-all shadow-xs"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-muted-foreground">{platform.icon}</span>
-                <div>
-                  <div className="text-sm font-medium">{platform.label}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {isConnected ? (
-                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                        Connected as {conn.account_handle || "Account"}
-                      </span>
-                    ) : (
-                      "Not connected"
-                    )}
+        {/* Error Notification */}
+        {errorParam ? (
+          <div className="mt-6 flex items-center gap-2.5 rounded-lg border border-destructive/20 bg-destructive/10 p-3.5 text-xs text-destructive">
+            <AlertCircle className="size-4 shrink-0" />
+            <span>Failed to connect: {decodeURIComponent(errorParam)}</span>
+          </div>
+        ) : null}
+
+        <div className="mt-8 space-y-3">
+          {PLATFORMS.map((platform) => {
+            const conn = connections.find((c) => c.platform === platform.id);
+            const isConnected = conn?.status === "connected";
+            const isLoading = connectingPlatform === platform.id || disconnectMutation.isPending;
+
+            return (
+              <div
+                key={platform.id}
+                className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-5 transition-all shadow-xs"
+              >
+                <div className="flex items-center gap-3.5">
+                  <span className="text-muted-foreground size-5 flex items-center justify-center">{platform.icon}</span>
+                  <div>
+                    <div className="text-sm font-semibold">{platform.label}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {isConnected ? (
+                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                          Connected as {conn.account_handle || "Account"}
+                        </span>
+                      ) : (
+                        "Not connected"
+                      )}
+                    </div>
                   </div>
                 </div>
+
+                {isConnected ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs text-muted-foreground hover:text-destructive"
+                    disabled={isLoading || isPending}
+                    onClick={() => disconnectMutation.mutate(platform.id)}
+                  >
+                    Disconnect
+                  </Button>
+                ) : (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="text-xs"
+                    disabled={isLoading || isPending}
+                    onClick={() => handleConnect(platform.id)}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-1.5 size-3.5 animate-spin" /> Connecting...
+                      </>
+                    ) : (
+                      `Connect ${platform.label}`
+                    )}
+                  </Button>
+                )}
               </div>
+            );
+          })}
+        </div>
 
-              {isConnected ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs text-muted-foreground hover:text-destructive"
-                  disabled={isLoading || isPending}
-                  onClick={() => disconnectMutation.mutate(platform.id)}
-                >
-                  Disconnect
-                </Button>
-              ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  disabled={isLoading || isPending}
-                  onClick={() => handleConnect(platform.id)}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-1.5 size-3.5 animate-spin" /> Connecting...
-                    </>
-                  ) : (
-                    `Connect ${platform.label}`
-                  )}
-                </Button>
-              )}
-            </div>
-          );
-        })}
-      </div>
+        <div className="mt-10 pt-4">
+          <Button
+            className="w-full text-xs font-medium"
+            size="lg"
+            disabled={connectedCount === 0}
+            onClick={() => void navigate({ to: "/done" })}
+          >
+            Continue to Next Step (Finish Setup)
+            <ArrowRight className="size-4 ml-1.5" />
+          </Button>
+          <p className="mt-3 text-xs text-center text-muted-foreground">
+            Connect at least one platform to continue. You can change accounts anytime.
+          </p>
+        </div>
 
-      <Button
-        className="mt-10"
-        disabled={connectedCount === 0}
-        onClick={() => void navigate({ to: "/done" })}
-      >
-        Finish setup
-        <ArrowRight className="size-4 ml-1.5" />
-      </Button>
-      <p className="mt-3 text-xs text-muted-foreground">
-        Connect at least one platform to start. You can manage or switch accounts anytime.
-      </p>
-    </main>
+        <div className="mt-8 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <ShieldCheck className="size-3.5 text-emerald-500" />
+          Zero passwords stored. All connections are secured via official OAuth 2.0 tokens.
+        </div>
+      </main>
+
+      <Footer />
+    </div>
   );
 }
