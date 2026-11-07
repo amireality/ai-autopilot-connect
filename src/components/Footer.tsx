@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Terminal, Shield, Heart } from "lucide-react";
+import { Shield } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 export function Footer() {
   return (
@@ -8,16 +9,10 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Brand info */}
           <div className="md:col-span-2 space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Terminal className="size-3.5" />
-              </div>
-              <span className="font-semibold text-base tracking-tight text-foreground">blew</span>
-              <span className="rounded-full bg-muted px-2 py-0.5 font-mono text-[10px] text-muted-foreground uppercase tracking-widest border border-border">
-                by setupr
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
+            <Link to="/">
+              <Logo size="md" />
+            </Link>
+            <p className="text-xs text-muted-foreground max-w-sm leading-relaxed mt-2">
               The zero-UI social media autopilot for modern AI agents. Publish high-impact thought leadership straight from ChatGPT, Claude, and Codex to X and LinkedIn.
             </p>
           </div>
@@ -39,12 +34,12 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#two-ways" className="hover:text-foreground transition-colors">
+                <a href="/#two-ways" className="hover:text-foreground transition-colors">
                   Setup Methods
                 </a>
               </li>
               <li>
-                <a href="#platforms" className="hover:text-foreground transition-colors">
+                <a href="/#platforms" className="hover:text-foreground transition-colors">
                   Supported AI Clients
                 </a>
               </li>
@@ -84,7 +79,7 @@ export function Footer() {
           <div>
             &copy; {new Date().getFullYear()} blew by setupr. All rights reserved.
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 text-muted-foreground">
             Zero friction, bring your own AI.
           </div>
         </div>

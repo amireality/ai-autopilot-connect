@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Terminal, Sparkles, User, LogOut, Shield, Menu, X as CloseIcon, ArrowRight } from "lucide-react";
+import { Sparkles, LogOut, Menu, X as CloseIcon, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
 
 export function Navbar() {
   const [user, setUser] = useState<{ email?: string; id: string } | null>(null);
@@ -38,30 +39,22 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/85 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         {/* Brand Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs transition-transform group-hover:scale-105">
-            <Terminal className="size-4" />
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-semibold text-lg tracking-tight text-foreground">blew</span>
-            <span className="rounded-full bg-muted px-2 py-0.5 font-mono text-[10px] text-muted-foreground uppercase tracking-widest border border-border/80">
-              by setupr
-            </span>
-          </div>
+        <Link to="/">
+          <Logo size="md" />
         </Link>
 
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-muted-foreground">
-          <a href="#how-it-works" className="hover:text-foreground transition-colors">
+          <a href="/#how-it-works" className="hover:text-foreground transition-colors">
             How It Works
           </a>
-          <a href="#two-ways" className="hover:text-foreground transition-colors">
+          <a href="/#two-ways" className="hover:text-foreground transition-colors">
             Setup Options
           </a>
-          <a href="#platforms" className="hover:text-foreground transition-colors">
+          <a href="/#platforms" className="hover:text-foreground transition-colors">
             AI Clients
           </a>
           <Link to="/upgrade" className="hover:text-foreground transition-colors">
@@ -79,7 +72,7 @@ export function Navbar() {
                 </Button>
               </Link>
               <Link to="/upgrade">
-                <Button size="sm" className="text-xs h-8 gap-1.5">
+                <Button size="sm" className="text-xs h-8 gap-1.5 shadow-xs">
                   <Sparkles className="size-3.5" />
                   Quota & Plans
                 </Button>
@@ -126,14 +119,14 @@ export function Navbar() {
         <div className="md:hidden border-b border-border bg-background px-6 py-4 space-y-3">
           <nav className="flex flex-col space-y-2 text-sm font-medium">
             <a
-              href="#how-it-works"
+              href="/#how-it-works"
               className="py-1 text-muted-foreground hover:text-foreground"
               onClick={() => setMobileMenuOpen(false)}
             >
               How It Works
             </a>
             <a
-              href="#two-ways"
+              href="/#two-ways"
               className="py-1 text-muted-foreground hover:text-foreground"
               onClick={() => setMobileMenuOpen(false)}
             >

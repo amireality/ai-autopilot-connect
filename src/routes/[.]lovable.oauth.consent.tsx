@@ -1,8 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
-import { Terminal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
 
 type OAuthResult = {
   redirect_url?: string;
@@ -29,12 +29,12 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
   }),
   head: () => ({
     meta: [
-      { title: "Authorize your AI client — setupr automate" },
+      { title: "Authorize your AI client — blew by setupr" },
       {
         name: "description",
-        content: "Approve or deny access for the AI client requesting your setupr automate account.",
+        content: "Approve or deny access for the AI client requesting your blew by setupr account.",
       },
-      { property: "og:title", content: "Authorize your AI client — setupr automate" },
+      { property: "og:title", content: "Authorize your AI client — blew by setupr" },
       { property: "og:description", content: "Approve or deny an AI client's access request." },
       { name: "robots", content: "noindex" },
     ],
@@ -58,12 +58,10 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
     return data;
   },
   errorComponent: ({ error }) => (
-    <main className="flex min-h-screen items-center justify-center px-6">
-      <div className="max-w-sm text-center">
-        <h1 className="text-lg font-semibold">Could not load this authorization request</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {String((error as Error)?.message ?? error)}
-        </p>
+    <main className="flex min-h-screen items-center justify-center px-6 py-16">
+      <div className="w-full max-w-md rounded-xl border border-destructive/40 bg-card p-7 text-center">
+        <h1 className="text-lg font-semibold text-destructive">Authorization failed</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
       </div>
     </main>
   ),
@@ -71,87 +69,88 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
 });
 
 function Consent() {
-  const details = Route.useLoaderData();
-  const { authorization_id } = Route.useSearch();
+  const { authorization_id: authorizationId } = Route.useSearch();
+  const data = Route.useLoaderData();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const clientName = details?.client?.name ?? "this AI client";
-  const redirectUri = details?.client?.redirect_uris?.[0];
-  const scopes = details?.scopes ?? (details?.scope ? details.scope.split(" ") : []);
+
+  const clientName = data?.client?.name ?? "An AI client";
+  const redirectUri = data?.client?.redirect_uris?.[0];
+  const scopes = data?.scopes ?? (data?.scope ? [data.scope] : []);
 
   async function decide(approve: boolean) {
     setBusy(true);
     setError(null);
     const api = oauthApi();
-    const { data, error: decideError } = approve
-      ? await api.approveAuthorization(authorization_id)
-      : await api.denyAuthorization(authorization_id);
-    if (decideError) {
+    const { data: result, error: decisionError } = approve
+      ? await api.approveAuthorization(authorizationId)
+      : await api.denyAuthorization(authorizationId);
+
+    if (decisionError) {
+      setError(decisionError.message);
       setBusy(false);
-      setError(decideError.message);
       return;
     }
-    const target = data?.redirect_url ?? data?.redirect_to;
+
+    const target = result?.redirect_url ?? result?.redirect_to;
     if (!target) {
+      setError("No redirect destination returned.");
       setBusy(false);
-      setError("No redirect was returned by the authorization server.");
       return;
     }
+
     window.location.href = target;
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-6 py-16">
-      <div className="w-full max-w-md rounded-xl border border-border bg-card p-7">
-        <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.28em] text-muted-foreground">
-          <Terminal className="size-3.5 text-primary" />
-          setupr automate
-        </div>
+    <main className="flex min-h-screen items-center justify-center px-6 py-16 bg-background text-foreground">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-md">
+        <Logo size="md" />
 
-        <h1 className="mt-6 text-xl font-semibold tracking-tight">
+        <h1 className="mt-6 text-xl font-bold tracking-tight">
           Connect {clientName} to your account
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {clientName} will be able to queue posts to your connected social
+        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+          {clientName} will be able to queue posts to your connected X and LinkedIn
           accounts while you are signed in.
         </p>
 
-        <dl className="mt-6 space-y-3 border-t border-border pt-5 text-sm">
+        <dl className="mt-6 space-y-3 border-t border-border pt-5 text-xs">
           {redirectUri ? (
             <div className="flex justify-between gap-4">
               <dt className="text-muted-foreground">Redirects to</dt>
-              <dd className="truncate font-mono text-xs">{redirectUri}</dd>
+              <dd className="truncate font-mono text-[11px] text-foreground">{redirectUri}</dd>
             </div>
           ) : null}
           {scopes.length ? (
             <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Shares</dt>
-              <dd className="text-right text-xs">{scopes.join(", ")}</dd>
+              <dt className="text-muted-foreground">Permissions</dt>
+              <dd className="text-right font-medium text-foreground">{scopes.join(", ")}</dd>
             </div>
           ) : null}
         </dl>
 
-        <p className="mt-5 text-xs text-muted-foreground">
-          This does not bypass this app's permissions — the client only ever sees your own data.
+        <p className="mt-5 text-[11px] text-muted-foreground">
+          Your credentials and tokens remain strictly isolated. {clientName} only ever accesses your personal posting queue.
         </p>
 
         {error ? (
-          <p role="alert" className="mt-4 text-sm text-destructive">
+          <p role="alert" className="mt-4 text-xs text-destructive">
             {error}
           </p>
         ) : null}
 
         <div className="mt-7 flex gap-3">
-          <Button className="flex-1" disabled={busy} onClick={() => decide(true)}>
-            {busy ? "Working…" : "Approve"}
+          <Button className="flex-1 text-xs font-semibold" disabled={busy} onClick={() => decide(true)}>
+            {busy ? "Authorizing..." : "Approve Connection"}
           </Button>
           <Button
-            variant="secondary"
-            className="flex-1"
+            variant="outline"
+            className="flex-1 text-xs"
             disabled={busy}
             onClick={() => decide(false)}
           >
-            Cancel connection
+            Cancel
           </Button>
         </div>
       </div>
