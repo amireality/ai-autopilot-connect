@@ -16,6 +16,12 @@ CREATE POLICY "Users can view own profile"
 ON public.profiles FOR SELECT 
 USING (auth.uid() = id);
 
+-- Allow users to update their own profile
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+CREATE POLICY "Users can update own profile" 
+ON public.profiles FOR UPDATE 
+USING (auth.uid() = id);
+
 -- 2. Create a trigger to automatically create a profile for new users
 CREATE OR REPLACE FUNCTION public.handle_new_user() 
 RETURNS trigger AS $$
@@ -36,13 +42,20 @@ INSERT INTO public.profiles (id, available_quota, tier)
 SELECT id, 5, 'free' FROM auth.users
 ON CONFLICT (id) DO NOTHING;
 
--- 4. Create function to decrement quota safely
-CREATE OR REPLACE FUNCTION decrement_quota(user_id UUID)
-RETURNS void AS $$
+-- 4. Create function to decrement quota safely and return remaining quota
+CREATE OR REPLACE FUNCTION decrement_quota(target_user_id UUID)
+RETURNS integer AS $$
+DECLARE
+  new_quota integer;
 BEGIN
   UPDATE public.profiles
-  SET available_quota = available_quota - 1
-  WHERE id = user_id AND available_quota > 0;
+  SET 
+    available_quota = GREATEST(available_quota - 1, 0),
+    updated_at = NOW()
+  WHERE id = target_user_id
+  RETURNING available_quota INTO new_quota;
+  
+  RETURN COALESCE(new_quota, 0);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

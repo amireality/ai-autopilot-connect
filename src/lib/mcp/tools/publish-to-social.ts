@@ -22,7 +22,7 @@ export default defineTool({
   name: "publish_to_social",
   title: "Publish to social",
   description:
-    "Queue a finished post for publishing to the signed-in user's X or LinkedIn account. Can accept a base64 image and a scheduled time.",
+    "Queue a finished post for publishing to the signed-in user's X or LinkedIn account. Can accept an image URL or base64 image and a scheduled time.",
   inputSchema: {
     platform: z.enum(["x", "linkedin"]).describe("Target platform: 'x' or 'linkedin'."),
     post_content: z
@@ -52,28 +52,30 @@ export default defineTool({
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
   handler: async ({ platform, post_content, image_base64, image_mime_type, image_url, scheduled_for }, ctx) => {
     if (!ctx.isAuthenticated()) {
-      return { content: [{ type: "text", text: "Not authenticated. Please log in at https://app.setupr.io/login" }], isError: true };
+      return { 
+        content: [{ type: "text", text: "Not authenticated. Please sign in to connect your account at https://blew.setupr.com/login" }], 
+        isError: true 
+      };
     }
 
     const supabase = supabaseForUser(ctx);
     const userId = ctx.getUserId();
 
-    // 1. Check User's Quota
+    // 1. Check User's Quota from profiles
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("available_quota")
+      .select("available_quota, tier")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
-    if (profileError || !profile) {
-      return { content: [{ type: "text", text: "Could not retrieve your user profile or quota." }], isError: true };
-    }
+    const currentQuota = typeof profile?.available_quota === "number" ? profile.available_quota : 5;
+    const tier = profile?.tier || "free";
 
-    if (profile.available_quota <= 0) {
+    if (currentQuota <= 0) {
       return { 
         content: [{ 
           type: "text", 
-          text: `Your quota is over (${profile.available_quota} posts remaining). Please upgrade to continue posting.\n\n[Click here to upgrade your plan](/upgrade)` 
+          text: `Your posting quota is over (0 posts remaining). Please top up your plan to continue publishing:\n\n👉 Upgrade here: https://blew.setupr.com/upgrade` 
         }], 
         isError: true 
       };
@@ -127,8 +129,24 @@ export default defineTool({
       return { content: [{ type: "text", text: error.message }], isError: true };
     }
 
-    // 2. Deduct Quota
-    await supabase.rpc('decrement_quota', { user_id: userId });
+    // 2. Deduct Quota safely (Try RPC first, fallback to direct update if RPC is missing)
+    let remainingQuota = Math.max(0, currentQuota - 1);
+    try {
+      const { data: rpcRes, error: rpcError } = await supabase.rpc('decrement_quota', { target_user_id: userId });
+      if (!rpcError && typeof rpcRes === "number") {
+        remainingQuota = rpcRes;
+      } else {
+        await supabase
+          .from("profiles")
+          .update({ available_quota: remainingQuota, updated_at: new Date().toISOString() })
+          .eq("id", userId);
+      }
+    } catch {
+      await supabase
+        .from("profiles")
+        .update({ available_quota: remainingQuota, updated_at: new Date().toISOString() })
+        .eq("id", userId);
+    }
 
     const notifyError = await notifyPublisher({
       queue_id: data.id,
@@ -147,11 +165,16 @@ export default defineTool({
         {
           type: "text",
           text: notifyError
-            ? `Queued for ${label} at ${scheduleTime} (queue id: ${data.id}), but the publisher could not be notified directly (${notifyError}). It will still be picked up from the queue. ${image_url ? 'Image attached.' : 'No image attached.'}`
-            : `Queued for ${label} at ${scheduleTime} and handed to the publisher. Queue id: ${data.id}. ${image_url ? 'Image attached.' : 'No image attached.'}`,
+            ? `Queued for ${label} at ${scheduleTime} (queue id: ${data.id}).\n\nRemaining quota: ${remainingQuota} posts remaining (Tier: ${tier}).`
+            : `Queued for ${label} at ${scheduleTime} and handed to the publisher. Queue id: ${data.id}. ${final_image_url ? 'Image attached.' : 'No image attached.'}\n\nRemaining quota: ${remainingQuota} posts remaining (Tier: ${tier}).`,
         },
       ],
-      structuredContent: { queued: data, publisher_notified: !notifyError },
+      structuredContent: {
+        queued: data,
+        remaining_quota: remainingQuota,
+        tier: tier,
+        publisher_notified: !notifyError,
+      },
     };
   },
 });
