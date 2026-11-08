@@ -188,8 +188,8 @@ Queries the authenticated user's remaining post balance and subscription tier.
 
 ```bash
 # Clone repository
-git clone https://github.com/amireality/ai-autopilot-connect.git
-cd ai-autopilot-connect
+git clone https://github.com/amireality/blew-by-setupr.git
+cd blew-by-setupr
 
 # Install dependencies
 npm install
