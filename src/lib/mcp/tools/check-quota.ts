@@ -5,7 +5,7 @@ export default defineTool({
   name: "check_quota",
   title: "Check posting quota",
   description:
-    "Check the signed-in user's remaining social post credits, active tier, and upgrade link. Call this whenever the user asks about their balance, quota, plan, or how many posts they have left.",
+    "Check the signed-in user's remaining social post credits, active tier, and account info. Call this whenever the user asks about their balance, quota, plan, or how many posts they have left.",
   inputSchema: {},
   annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   handler: async (_input, ctx) => {
@@ -37,13 +37,13 @@ export default defineTool({
       content: [
         {
           type: "text",
-          text: `You have ${quota} posts remaining on your blew account.\nTier: ${tier.toUpperCase()}\n\nTo top up more posts, visit: https://blew.setupr.com/upgrade`,
+          text: `You have ${quota} posts remaining on your Blew account.\nTier: ${tier.toUpperCase()}\n\nFor account details and plan information, visit: https://blew.setupr.com`,
         },
       ],
       structuredContent: {
         available_quota: quota,
         tier,
-        upgrade_url: "https://blew.setupr.com/upgrade",
+        account_url: "https://blew.setupr.com",
       },
     };
   },
