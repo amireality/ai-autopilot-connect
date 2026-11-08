@@ -45,7 +45,7 @@ function loadScript() {
 }
 
 const FREE = ["5 posts included upon sign up", "Direct X and LinkedIn publishing", "Full image and media support", "Works with ChatGPT, Claude & Codex"];
-const PRO = ["+100 posts added to your balance", "Credits never expire", "Priority n8n queue execution", "Top up anytime as you grow"];
+const PRO = ["+100 posts added to your balance", "Credits never expire", "Priority dispatch & instant publishing", "Top up anytime as you grow"];
 
 function Upgrade() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);

@@ -59,7 +59,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 5. Create function to add subscription quota safely (called by n8n upon payment)
+-- 5. Create function to add subscription quota safely (called upon verified payment)
 CREATE OR REPLACE FUNCTION add_subscription_quota(target_user_id UUID, quota_to_add INTEGER, new_tier TEXT)
 RETURNS void AS $$
 BEGIN

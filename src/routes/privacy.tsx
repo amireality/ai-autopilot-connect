@@ -131,7 +131,7 @@ function PrivacyPolicy() {
               <ul className="list-disc pl-5 space-y-1.5">
                 <li>Authenticating MCP requests using your personal Bearer token or authenticated user session.</li>
                 <li>Validating that your account has an active post quota before submitting content.</li>
-                <li>Passing the approved post text and media payload to our background execution engine (n8n) to publish on your authorized X or LinkedIn account.</li>
+                <li>Passing the approved post text and media payload to our secure background dispatch engine to publish on your authorized X or LinkedIn account.</li>
                 <li>Providing account management features, quota top-ups, and customer support.</li>
               </ul>
               <p className="font-semibold text-foreground">

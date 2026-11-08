@@ -2,7 +2,7 @@ import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { runtimeEnv, supabaseForUser } from "../supabase";
 
-/** Notify the n8n publisher that a new row landed in the queue. Never blocks the tool result. */
+/** Notify the background publisher that a new row landed in the queue. Never blocks the tool result. */
 async function notifyPublisher(payload: Record<string, unknown>): Promise<string | null> {
   const url = runtimeEnv("N8N_PUBLISH_WEBHOOK_URL")?.trim();
   if (!url) return "publisher webhook not configured";

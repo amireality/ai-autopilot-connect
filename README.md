@@ -56,7 +56,7 @@ Meanwhile, custom GPTs in app stores trap you inside a walled garden—you canno
               │                            │
               ▼                            ▼
 ┌───────────────────────────┐┌───────────────────────────┐
-│     Supabase Vault        ││   n8n Execution Engine    │
+│     Supabase Vault        ││   Cloud Dispatch Engine   │
 │ • AES-256 Encrypted OAuth ││ • Media processing        │
 │ • Post quota ledger       ││ • Rate limit compliance   │
 └───────────────────────────┘└─────────────┬─────────────┘
