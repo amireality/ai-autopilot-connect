@@ -167,6 +167,7 @@ export type Database = {
         Args: { new_tier: string; quota_to_add: number; target_user_id: string }
         Returns: undefined
       }
+      decrement_quota: { Args: { target_user_id: string }; Returns: number }
       fulfill_razorpay_order: {
         Args: { _order_id: string; _payment_id: string }
         Returns: number

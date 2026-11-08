@@ -11,15 +11,15 @@
   },
   "mcp": {
     "server": {
-      "name": "setupr-automate",
-      "version": "0.1.0",
-      "title": "setupr automate"
+      "name": "blew-by-setupr",
+      "version": "0.2.0",
+      "title": "blew by setupr"
     },
     "tools": [
       {
         "name": "publish_to_social",
         "title": "Publish to social",
-        "description": "Queue a finished post for publishing to the signed-in user's X or LinkedIn account. Can accept a base64 image and a scheduled time.",
+        "description": "Queue a finished post for publishing to the signed-in user's X or LinkedIn account. Can accept an image URL or base64 image and a scheduled time.",
         "annotations": {
           "readOnlyHint": false,
           "destructiveHint": false,
@@ -66,6 +66,22 @@
           ],
           "additionalProperties": false,
           "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "check_quota",
+        "title": "Check posting quota",
+        "description": "Check the signed-in user's remaining social post credits, active tier, and account info. Call this whenever the user asks about their balance, quota, plan, or how many posts they have left.",
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
         },
         "outputSchema": null
       }
