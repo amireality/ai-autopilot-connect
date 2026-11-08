@@ -1,65 +1,208 @@
-# AI Social Automate
+<p align="center">
+  <a href="https://blew.setupr.com">
+    <img src="https://blew.setupr.com/logo.png" alt="blew by setupr logo" width="72" height="72" />
+  </a>
+</p>
 
-Product Requirements Document (PRD): Agentic News MCP
-Instructions for Lovable: Please read this entire PRD carefully. You are acting as the foundational architect for a "Bring Your Own AI" SaaS platform. Build the initial scaffolding, UI, and database schema based strictly on this document.
-1. Executive Summary
-Product Name: setupr automate MCP Concept: A zero-UI automation hub powered by the Model Context Protocol (MCP). The product bridges a central, daily-updated knowledge source (a newspaper stored in OneDrive) with the end-user's personal AI client (like Claude Desktop). The USP: The user's AI handles all interaction, reasoning, and content generation. Our platform simply handles authentication and provides the execution pipes (reading the file, posting to social media). We do not pay for AI API costs; the user's AI client does the heavy lifting.
-2. Technical Architecture & Tech Stack
-Frontend / Landing: React/Vite/Next.js with Tailwind CSS (Minimalist, dark-mode SaaS aesthetic).
-Authentication: Supabase (Handles user sign-ups and stores OAuth tokens for social media).
-Backend / MCP Server: Node.js / Edge functions to handle the standard MCP protocol handshake and expose tools.
-Execution Engine: n8n (External). The MCP tools act strictly as pass-through webhooks to our n8n server, which handles the actual posting to Twitter/LinkedIn.
-3. The User Journey & Screen Flow
-We are NOT building a dashboard, a feed, or a content editor. The web app is strictly for authentication and setup.
-Screen 1: The Landing Page
-A highly polished, text-focused hero section explaining the value: "Connect your AI to the daily news and automate your social presence."
-Displays the Universal MCP Link (e.g., mcp.ourdomain.com).
-Provides simple instructions on how to paste this link into Claude Desktop.
-Crucial: There is NO manual "Sign Up" button here. Auth is triggered via the AI.
-Screen 2: The MCP Auth Redirect (Login)
-When the user adds the MCP link to their AI, the MCP protocol requires authentication. The user is redirected to this Supabase-powered login/signup screen.
-Screen 3: The Setup Wizard (Post-Auth)
-After logging in, the user sees a minimal setup screen.
-Goal: Connect social media accounts.
-UI: Large, clear buttons to "Connect LinkedIn" and "Connect X (Twitter)".
-Note: Do NOT ask for the user's "Niche" or preferences. The user's personal AI already knows their context. We only need their social OAuth tokens to post on their behalf.
-Screen 4: Success State
-"You're all set. Return to your AI to begin."
-4. MCP Server Specifications (The Boilerplate)
-Lovable must generate the backend boilerplate to serve as an MCP Server. The server must expose the following two tools to the AI client:
-Tool 1: get_daily_paper_content
-Purpose: Passes the content of today's newspaper directly to the user's AI client.
-Logic: Pings an n8n webhook to fetch the PDF/text from our master OneDrive, and returns the raw content to the AI.
-Cost Saving Note: By returning the raw content, the user's AI (Claude) does the reading, curating, and writing. We spend $0 on AI API costs.
-Tool 2: publish_to_social
-Arguments: platform (string), post_content (string)
-Purpose: Publishes the AI's finalized draft to the user's social media.
-Logic: The AI does NOT manage or see any OAuth tokens. When the AI calls this tool, the MCP server simply saves the post_content and platform into a dedicated table in our Supabase database (e.g., publishing_queue).
-The n8n Handoff: Our n8n server constantly watches this Supabase table. As soon as a new post lands in the queue, n8n automatically picks it up, uses its own native social connections to publish it, and marks the row as 'published'. Classic automation flow.
-5. Design Guidelines for Lovable
-Strip away anything that looks like a traditional SaaS dashboard.
-The UI should feel like a secure, developer-focused tool (think Stripe or Vercel login flows).
-Ensure the Supabase schema is set up to store multiple OAuth connection tokens (X, LinkedIn) mapped to a single user_id.
+<h1 align="center">blew by setupr</h1>
 
-This project was built with [Lovable](https://lovable.dev).
+<p align="center">
+  <strong>The zero-dashboard social media autopilot for AI agents.</strong><br />
+  Publish directly to X (Twitter) and LinkedIn straight from your regular ChatGPT, Claude, and Codex chats.
+</p>
 
-**Live app**: https://ai-autopilot-connect.lovable.app
+<p align="center">
+  <a href="https://blew.setupr.com"><img src="https://img.shields.io/badge/Live%20Service-blew.setupr.com-FF6600?style=flat-square" alt="Live App" /></a>
+  <a href="https://blew.setupr.com/.well-known/oauth-protected-resource"><img src="https://img.shields.io/badge/OAuth%202.0-Protected%20Resource-emerald?style=flat-square" alt="OAuth 2.0" /></a>
+  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/Protocol-Model%20Context%20Protocol-5B5BD6?style=flat-square" alt="MCP Protocol" /></a>
+  <a href="https://smithery.ai"><img src="https://img.shields.io/badge/Indexed%20on-Smithery-black?style=flat-square" alt="Smithery" /></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" /></a>
+</p>
 
-## Build with Lovable
+---
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/f33542f1-678b-4f31-b580-2065ca969f4e).
+## ⚡ The Zero-Dashboard Philosophy
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+Traditional social media schedulers (Buffer, Hootsuite, Typefully) force you to work backwards: you brainstorm with an AI in one tab, copy-paste the text into an external dashboard, adjust formats, upload media, and switch back and forth.
 
-## Development
+Meanwhile, custom GPTs in app stores trap you inside a walled garden—you cannot access your usual workspace context, custom instructions, or conversational flow.
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+**Blew reimagines social media with a zero-dashboard architecture:**
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+1. **Bring Your Own AI:** Blew runs as a standard [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server inside your daily AI client—**ChatGPT**, **Claude Desktop**, **Claude Code**, **Cursor**, or **Windsurf**.
+2. **Conversational Publishing:** As you chat, ideate, or write code, simply tell your AI:  
+   > *"Draft a thread on our new feature launch and publish it to my X and LinkedIn with our diagram."*
+3. **One-Click Approval:** The AI presents the formatted draft and requests confirmation. You say *"Looks good, post it"*, and Blew securely transmits the post to your verified accounts.
+4. **No Dashboard to Check:** No extra tabs. No content editors. Your AI does the thinking, and Blew provides the authenticated execution pipe.
+
+---
+
+## 🏗️ Architecture
+
 ```
+┌────────────────────────────────────────────────────────┐
+│     Your AI Client (ChatGPT / Claude / Codex / Cursor) │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            │ MCP JSON-RPC (HTTP SSE / Streamable)
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│               blew by setupr MCP Gateway               │
+│                https://blew.setupr.com/mcp             │
+├───────────────────────────┬────────────────────────────┤
+│ • MCP Tool Handshake      │ • Quota Validation        │
+│ • Bearer Token Auth       │ • Payload Sanitization     │
+└─────────────┬─────────────┴──────────────┬─────────────┘
+              │                            │
+              ▼                            ▼
+┌───────────────────────────┐┌───────────────────────────┐
+│     Supabase Vault        ││   n8n Execution Engine    │
+│ • AES-256 Encrypted OAuth ││ • Media processing        │
+│ • Post quota ledger       ││ • Rate limit compliance   │
+└───────────────────────────┘└─────────────┬─────────────┘
+                                           │
+                                           ▼
+                            ┌────────────────────────────┐
+                            │   X (Twitter) & LinkedIn   │
+                            │    Official REST APIs      │
+                            └────────────────────────────┘
+```
+
+---
+
+## 🚀 Quickstart & Supported Clients
+
+You can connect Blew in less than 60 seconds through your preferred AI environment.
+
+### 1. ChatGPT (Developer Connectors / Plugins)
+1. Open **ChatGPT** and navigate to your **Account Settings** &rarr; **Connected Apps** (or developer connectors).
+2. Add a new remote MCP connector:
+   - **Server URL:** `https://blew.setupr.com/mcp`
+   - **Discovery URL:** `https://blew.setupr.com`
+3. Authorize via your Blew account. Your regular ChatGPT conversations now have access to `publish_to_social`.
+
+---
+
+### 2. Claude Desktop
+Add `blew` to your `claude_desktop_config.json`:
+
+* **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+* **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "blew": {
+      "type": "http",
+      "url": "https://blew.setupr.com/mcp"
+    }
+  }
+}
+```
+
+---
+
+### 3. Claude Code (CLI)
+Install with a single command:
+
+```bash
+claude mcp add --scope user --transport http blew https://blew.setupr.com/mcp
+```
+
+---
+
+### 4. Smithery Index
+Blew is pre-configured for automated 1-click installation via [Smithery.ai](https://smithery.ai):
+
+```bash
+npx -y @smithery/cli install blew --client claude
+```
+
+---
+
+### 5. Cursor / Windsurf / Codex
+Add an HTTP MCP server pointing to:
+```
+https://blew.setupr.com/mcp
+```
+
+---
+
+## 🛠️ MCP Tools Exposed
+
+Blew registers two core tools compliant with the Model Context Protocol specification:
+
+### `publish_to_social`
+Publishes drafted content to the user's connected social media platforms.
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `platform` | `string` | **Yes** | Target social network: `'twitter'`, `'linkedin'`, or `'both'` |
+| `post_content` | `string` | **Yes** | Plain text body of the update |
+| `media_url` | `string` | No | Public URL of an image or graphic to attach |
+
+```json
+{
+  "name": "publish_to_social",
+  "arguments": {
+    "platform": "both",
+    "post_content": "Excited to unveil our new zero-dashboard social media autopilot powered by the Model Context Protocol!",
+    "media_url": "https://blew.setupr.com/og-banner.png"
+  }
+}
+```
+
+### `check_quota`
+Queries the authenticated user's remaining post balance and subscription tier.
+
+```json
+{
+  "name": "check_quota",
+  "arguments": {}
+}
+```
+
+---
+
+## 🔒 Security, Privacy & Standards
+
+- **Zero Prompt Retention:** Blew does not read, log, or train on your conversation prompts, system instructions, or internal reasoning. Only the approved text payload sent to `publish_to_social` reaches our execution engine.
+- **Encrypted OAuth 2.0 Vault:** Social media access and refresh tokens are encrypted at rest with **AES-256**. We never see, handle, or store your personal passwords.
+- **Official API Compliance:** Uses X API v2 and LinkedIn Community/Consumer APIs with minimum necessary permissions.
+- **One-Click Revocation:** Disconnect your social profiles anytime in 1 click at [blew.setupr.com/setup](https://blew.setupr.com/setup).
+- **Public Policies:**
+  - **Privacy Policy:** [https://blew.setupr.com/privacy](https://blew.setupr.com/privacy)
+  - **Terms of Service:** [https://blew.setupr.com/terms](https://blew.setupr.com/terms)
+  - **OAuth Protected Resource:** [https://blew.setupr.com/.well-known/oauth-protected-resource](https://blew.setupr.com/.well-known/oauth-protected-resource)
+
+---
+
+## 💳 Quotas & Pricing
+
+- **Free Starter Plan:** 5 complimentary posts upon registration to test your setup.
+- **Pay-as-you-grow Top-Ups:** Purchase additional posts (e.g., 100 posts for ₹499) at [blew.setupr.com/upgrade](https://blew.setupr.com/upgrade). Credits never expire.
+
+---
+
+## 👨‍💻 Local Development
+
+```bash
+# Clone repository
+git clone https://github.com/amireality/ai-autopilot-connect.git
+cd ai-autopilot-connect
+
+# Install dependencies
+npm install
+
+# Start local development server
+npm run dev
+
+# Build production bundle
+npm run build
+```
+
+---
+
+<p align="center">
+  Built with ❤️ by <a href="https://setupr.com">Setupr</a> • Designed for the Agentic Era
+</p>

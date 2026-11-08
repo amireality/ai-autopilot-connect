@@ -25,16 +25,16 @@ import { Badge } from "@/components/ui/badge";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "blew by setupr — Publish to X and LinkedIn from your AI" },
+      { title: "blew by setupr — Zero-Dashboard Social Autopilot for AI" },
       {
         name: "description",
         content:
-          "The zero-UI social media autopilot for AI agents. Connect ChatGPT, Claude, and Codex directly to X and LinkedIn through one MCP link.",
+          "The zero-dashboard social autopilot for AI. Connect ChatGPT, Claude, and Codex directly to X and LinkedIn from regular chat through one MCP link.",
       },
-      { property: "og:title", content: "blew by setupr — Social Autopilot for AI" },
+      { property: "og:title", content: "blew by setupr — Zero-Dashboard Social Autopilot" },
       {
         property: "og:description",
-        content: "Let your AI draft and publish directly to X and LinkedIn with official OAuth 2.0.",
+        content: "Zero dashboard. Bring your own AI. Publish directly to X and LinkedIn from your regular chat.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -61,7 +61,7 @@ function Landing() {
             {/* Announcement Pill */}
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 text-xs text-primary shadow-xs mb-8">
               <Sparkles className="size-3.5" />
-              <span>Model Context Protocol (MCP) • Multi-Tenant Social Autopilot</span>
+              <span>Zero-Dashboard Social Autopilot • Powered by Model Context Protocol (MCP)</span>
             </div>
 
             {/* Main Headline */}
@@ -72,7 +72,7 @@ function Landing() {
 
             {/* Subhead */}
             <p className="mt-6 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Stop copy-pasting drafts between tabs. Connect ChatGPT, Claude, or any MCP client directly to your personal social profiles. Text, images, and scheduled queues with zero manual friction.
+              <strong className="text-foreground">Zero dashboard. Zero tab-switching.</strong> Bring your own AI (ChatGPT, Claude, or Codex). It drafts, you approve, and Blew publishes directly to your personal X and LinkedIn profiles straight from your regular chat conversations.
             </p>
 
             {/* Hero CTAs */}
@@ -93,13 +93,13 @@ function Landing() {
             {/* Trust Badges */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
-                <Check className="size-3.5 text-emerald-500" /> No developer accounts required
+                <Check className="size-3.5 text-emerald-500" /> Zero dashboard — lives in your chat
               </span>
               <span className="flex items-center gap-1.5">
-                <Check className="size-3.5 text-emerald-500" /> Official OAuth 2.0 permissions
+                <Check className="size-3.5 text-emerald-500" /> Bring your own AI (ChatGPT, Claude, Codex)
               </span>
               <span className="flex items-center gap-1.5">
-                <Check className="size-3.5 text-emerald-500" /> Cancel anytime
+                <Check className="size-3.5 text-emerald-500" /> Official OAuth 2.0 verified
               </span>
             </div>
 

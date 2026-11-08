@@ -1,0 +1,51 @@
+# Smithery configuration file
+# Reference: https://smithery.ai/docs/config#smitheryyaml
+name: "blew"
+version: "0.2.0"
+description: "The zero-dashboard social media autopilot for AI agents. Publish to X and LinkedIn directly from ChatGPT, Claude, and Codex via official OAuth 2.0."
+author: "Setupr <support@setupr.com>"
+homepage: "https://blew.setupr.com"
+repository: "https://github.com/amireality/ai-autopilot-connect"
+license: "MIT"
+
+# Remote HTTP MCP Server Transport
+startCommand:
+  type: "http"
+  config:
+    url: "https://blew.setupr.com/mcp"
+  http:
+    url: "https://blew.setupr.com/mcp"
+    endpoint: "https://blew.setupr.com/mcp"
+
+# User configuration schema
+configSchema:
+  type: "object"
+  properties: {}
+
+exampleConfig: {}
+
+# Directory Tool Declarations for indexing
+tools:
+  - name: "publish_to_social"
+    description: "Publishes drafted content to the user's connected social media platforms (X/Twitter and/or LinkedIn). Requires explicit user confirmation before posting."
+    inputSchema:
+      type: "object"
+      required:
+        - "platform"
+        - "post_content"
+      properties:
+        platform:
+          type: "string"
+          enum: ["twitter", "linkedin", "both"]
+          description: "Target social network: 'twitter' (X), 'linkedin', or 'both'"
+        post_content:
+          type: "string"
+          description: "The textual body of the social media update"
+        media_url:
+          type: "string"
+          description: "Optional public URL of an image or graphic to attach to the post"
+  - name: "check_quota"
+    description: "Checks the authenticated user's remaining post quota balance and account tier."
+    inputSchema:
+      type: "object"
+      properties: {}

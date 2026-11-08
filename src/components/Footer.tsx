@@ -13,7 +13,7 @@ export function Footer() {
               <Logo size="md" />
             </Link>
             <p className="text-xs text-muted-foreground max-w-sm leading-relaxed mt-2">
-              The zero-UI social media autopilot for modern AI agents. Publish high-impact thought leadership straight from ChatGPT, Claude, and Codex to X and LinkedIn.
+              The zero-dashboard social media autopilot for modern AI agents. Publish high-impact thought leadership straight from ChatGPT, Claude, and Codex to X and LinkedIn.
             </p>
           </div>
 
@@ -58,14 +58,14 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="https://setupr.com/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                <Link to="/privacy" className="hover:text-foreground transition-colors">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="https://setupr.com/terms" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                <Link to="/terms" className="hover:text-foreground transition-colors">
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
                 <Shield className="size-3.5" /> Official OAuth 2.0 Verified
