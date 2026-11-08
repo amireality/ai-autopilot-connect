@@ -13,17 +13,18 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as McpRouteImport } from './routes/mcp'
-import { Route as UpgradeRouteImport } from './routes/upgrade'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as UpgradeRouteImport } from './routes/upgrade'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotwellKnownChar93OpenaiAppsChallengeRouteImport } from './routes/[.well-known]/openai-apps-challenge'
 import { Route as AuthenticatedDoneRouteImport } from './routes/_authenticated/done'
 import { Route as AuthenticatedSetupRouteImport } from './routes/_authenticated/setup'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
-import { Route as ApiAuthCallbackXRouteImport } from './routes/api/auth/callback/x'
 import { Route as ApiAuthCallbackLinkedinRouteImport } from './routes/api/auth/callback/linkedin'
+import { Route as ApiAuthCallbackXRouteImport } from './routes/api/auth/callback/x'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -44,11 +45,6 @@ const McpRoute = McpRouteImport.update({
   path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UpgradeRoute = UpgradeRouteImport.update({
-  id: '/upgrade',
-  path: '/upgrade',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -57,6 +53,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UpgradeRoute = UpgradeRouteImport.update({
+  id: '/upgrade',
+  path: '/upgrade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotmcpChar93ListToolsRoute =
@@ -69,6 +70,12 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
     path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotwellKnownChar93OpenaiAppsChallengeRoute =
+  Char91DotwellKnownChar93OpenaiAppsChallengeRouteImport.update({
+    id: '/.well-known/openai-apps-challenge',
+    path: '/.well-known/openai-apps-challenge',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AuthenticatedDoneRoute = AuthenticatedDoneRouteImport.update({
@@ -92,40 +99,50 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAuthCallbackLinkedinRoute = ApiAuthCallbackLinkedinRouteImport.update({
+  id: '/api/auth/callback/linkedin',
+  path: '/api/auth/callback/linkedin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthCallbackXRoute = ApiAuthCallbackXRouteImport.update({
+  id: '/api/auth/callback/x',
+  path: '/api/auth/callback/x',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
-  '/upgrade': typeof UpgradeRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/upgrade': typeof UpgradeRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.well-known/openai-apps-challenge': typeof Char91DotwellKnownChar93OpenaiAppsChallengeRoute
   '/done': typeof AuthenticatedDoneRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
-  '/api/auth/callback/x': typeof ApiAuthCallbackXRoute
   '/api/auth/callback/linkedin': typeof ApiAuthCallbackLinkedinRoute
   '/api/auth/callback/x': typeof ApiAuthCallbackXRoute
-  '/api/auth/callback/linkedin': typeof ApiAuthCallbackLinkedinRoute
-  '/api/auth/callback/x': typeof ApiAuthCallbackXRoute
-  '/api/auth/callback/linkedin': typeof ApiAuthCallbackLinkedinRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
-  '/upgrade': typeof UpgradeRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/upgrade': typeof UpgradeRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.well-known/openai-apps-challenge': typeof Char91DotwellKnownChar93OpenaiAppsChallengeRoute
   '/done': typeof AuthenticatedDoneRoute
   '/setup': typeof AuthenticatedSetupRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/auth/callback/linkedin': typeof ApiAuthCallbackLinkedinRoute
+  '/api/auth/callback/x': typeof ApiAuthCallbackXRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -133,15 +150,18 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
-  '/upgrade': typeof UpgradeRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/upgrade': typeof UpgradeRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.well-known/openai-apps-challenge': typeof Char91DotwellKnownChar93OpenaiAppsChallengeRoute
   '/_authenticated/done': typeof AuthenticatedDoneRoute
   '/_authenticated/setup': typeof AuthenticatedSetupRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/auth/callback/linkedin': typeof ApiAuthCallbackLinkedinRoute
+  '/api/auth/callback/x': typeof ApiAuthCallbackXRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -149,44 +169,53 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/mcp'
-    | '/upgrade'
     | '/privacy'
     | '/terms'
+    | '/upgrade'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/.well-known/openai-apps-challenge'
     | '/done'
     | '/setup'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/auth/callback/linkedin'
+    | '/api/auth/callback/x'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/mcp'
-    | '/upgrade'
     | '/privacy'
     | '/terms'
+    | '/upgrade'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/.well-known/openai-apps-challenge'
     | '/done'
     | '/setup'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/auth/callback/linkedin'
+    | '/api/auth/callback/x'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/login'
     | '/mcp'
-    | '/upgrade'
     | '/privacy'
     | '/terms'
+    | '/upgrade'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/.well-known/openai-apps-challenge'
     | '/_authenticated/done'
     | '/_authenticated/setup'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/auth/callback/linkedin'
+    | '/api/auth/callback/x'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -194,15 +223,16 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   McpRoute: typeof McpRoute
-  UpgradeRoute: typeof UpgradeRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  UpgradeRoute: typeof UpgradeRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  Char91DotwellKnownChar93OpenaiAppsChallengeRoute: typeof Char91DotwellKnownChar93OpenaiAppsChallengeRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
-  ApiAuthCallbackXRoute: typeof ApiAuthCallbackXRoute
   ApiAuthCallbackLinkedinRoute: typeof ApiAuthCallbackLinkedinRoute
+  ApiAuthCallbackXRoute: typeof ApiAuthCallbackXRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -235,13 +265,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/upgrade': {
-      id: '/upgrade'
-      path: '/upgrade'
-      fullPath: '/upgrade'
-      preLoaderRoute: typeof UpgradeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -256,6 +279,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/upgrade': {
+      id: '/upgrade'
+      path: '/upgrade'
+      fullPath: '/upgrade'
+      preLoaderRoute: typeof UpgradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.mcp/list-tools': {
       id: '/.mcp/list-tools'
       path: '/.mcp/list-tools'
@@ -268,6 +298,13 @@ declare module '@tanstack/react-router' {
       path: '/.well-known/oauth-protected-resource'
       fullPath: '/.well-known/oauth-protected-resource'
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/openai-apps-challenge': {
+      id: '/.well-known/openai-apps-challenge'
+      path: '/.well-known/openai-apps-challenge'
+      fullPath: '/.well-known/openai-apps-challenge'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OpenaiAppsChallengeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/done': {
@@ -291,11 +328,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/auth/callback/x': {
-      id: '/api/auth/callback/x'
-      path: '/api/auth/callback/x'
-      fullPath: '/api/auth/callback/x'
-      preLoaderRoute: typeof ApiAuthCallbackXRouteImport
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/callback/linkedin': {
@@ -305,11 +342,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthCallbackLinkedinRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.mcp/invoke-tool/$tool': {
-      id: '/.mcp/invoke-tool/$tool'
-      path: '/.mcp/invoke-tool/$tool'
-      fullPath: '/.mcp/invoke-tool/$tool'
-      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+    '/api/auth/callback/x': {
+      id: '/api/auth/callback/x'
+      path: '/api/auth/callback/x'
+      fullPath: '/api/auth/callback/x'
+      preLoaderRoute: typeof ApiAuthCallbackXRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -333,16 +370,18 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   McpRoute: McpRoute,
-  UpgradeRoute: UpgradeRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  UpgradeRoute: UpgradeRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  Char91DotwellKnownChar93OpenaiAppsChallengeRoute:
+    Char91DotwellKnownChar93OpenaiAppsChallengeRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
-  ApiAuthCallbackXRoute: ApiAuthCallbackXRoute,
   ApiAuthCallbackLinkedinRoute: ApiAuthCallbackLinkedinRoute,
+  ApiAuthCallbackXRoute: ApiAuthCallbackXRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
