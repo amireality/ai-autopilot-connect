@@ -61,7 +61,7 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
     <main className="flex min-h-screen items-center justify-center px-6 py-16">
       <div className="w-full max-w-md rounded-xl border border-destructive/40 bg-card p-7 text-center">
         <h1 className="text-lg font-semibold text-destructive">Authorization failed</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
       </div>
     </main>
   ),

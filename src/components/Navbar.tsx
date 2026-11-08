@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 
 export function Navbar() {
-  const [user, setUser] = useState<{ email?: string; id: string } | null>(null);
+  const [user, setUser] = useState<{ email?: string | undefined; id: string } | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
