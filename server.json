@@ -1,0 +1,26 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.amireality/blew",
+  "description": "The zero-dashboard social media autopilot for AI agents. Connect ChatGPT, Claude, and Codex directly to personal X and LinkedIn profiles from regular chat.",
+  "version": "0.2.0",
+  "homepage": "https://blew.setupr.com",
+  "repository": {
+    "url": "https://github.com/amireality/ai-autopilot-connect.git",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://blew.setupr.com/logo.png",
+      "mimeType": "image/png",
+      "sizes": ["512x512"]
+    }
+  ],
+  "remotes": [
+    {
+      "transport": {
+        "type": "http",
+        "url": "https://blew.setupr.com/mcp"
+      }
+    }
+  ]
+}
