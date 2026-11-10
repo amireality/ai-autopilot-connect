@@ -71,8 +71,8 @@ export default defineTool({
     let currentQuota = typeof profile?.available_quota === "number" ? profile.available_quota : 5;
     let tier = profile?.tier || "free";
 
-    // Auto-grant Pro Tier with 500 posts to the owner account
-    if (userId === "86ec3628-64da-45d6-a4e3-91481c19765a" && (tier !== "pro" || currentQuota < 100)) {
+    // Auto-grant Pro Tier with 500 posts to the owner account if not yet pro
+    if (userId === "86ec3628-64da-45d6-a4e3-91481c19765a" && tier !== "pro") {
       tier = "pro";
       currentQuota = 500;
       try {
@@ -154,32 +154,52 @@ export default defineTool({
     }
 
     let final_image_url = image_url || null;
+    let final_image_base64 = image_base64 || null;
+    let final_image_mime_type = image_mime_type || null;
 
-    // Handle Image Upload if provided via base64
-    if (image_base64 && image_mime_type) {
+    // Prefetch image_url to base64 at edge so the publisher worker never gets blocked by CDN/hosting rate limits
+    if (!final_image_base64 && image_url) {
       try {
-        const buffer = Buffer.from(image_base64, 'base64');
-        const fileExtension = image_mime_type.split('/')[1] || 'png';
+        const imgFetch = await fetch(image_url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+          },
+        });
+        if (imgFetch.ok) {
+          const contentType = imgFetch.headers.get("content-type");
+          if (contentType && contentType.startsWith("image/")) {
+            final_image_mime_type = contentType.split(";")[0].trim();
+          }
+          const arrBuf = await imgFetch.arrayBuffer();
+          final_image_base64 = Buffer.from(arrBuf).toString("base64");
+        }
+      } catch (err) {
+        console.warn("Failed to prefetch image_url to base64:", err);
+      }
+    }
+
+    // Optional Supabase storage mirror if base64 exists but no URL was given
+    if (final_image_base64 && final_image_mime_type && !final_image_url) {
+      try {
+        const buffer = Buffer.from(final_image_base64, "base64");
+        const fileExtension = final_image_mime_type.split("/")[1] || "png";
         const filename = `${ctx.getUserId()}_${Date.now()}.${fileExtension}`;
 
         const { data: storageData, error: storageError } = await supabase
           .storage
-          .from('social_images')
+          .from("social_images")
           .upload(filename, buffer, {
-            contentType: image_mime_type,
-            upsert: false
+            contentType: final_image_mime_type,
+            upsert: false,
           });
 
-        if (storageError) {
-          return { content: [{ type: "text", text: `Storage upload error: ${storageError.message}` }], isError: true };
+        if (!storageError) {
+          const { data: publicUrlData } = supabase.storage.from("social_images").getPublicUrl(filename);
+          final_image_url = publicUrlData.publicUrl;
         }
-
-        // Get the permanent public URL
-        const { data: publicUrlData } = supabase.storage.from('social_images').getPublicUrl(filename);
-        final_image_url = publicUrlData.publicUrl;
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        return { content: [{ type: "text", text: `Failed to process image: ${message}` }], isError: true };
+        console.warn("Storage upload optional fallback error:", err);
       }
     }
 
@@ -203,9 +223,6 @@ export default defineTool({
 
     // 2. Deduct Quota safely (Try RPC first, fallback to direct update if RPC is missing)
     let remainingQuota = Math.max(0, currentQuota - 1);
-    if (userId === "86ec3628-64da-45d6-a4e3-91481c19765a") {
-      remainingQuota = 500;
-    } else
     try {
       const { data: rpcRes, error: rpcError } = await supabase.rpc('decrement_quota', { target_user_id: userId });
       if (!rpcError && typeof rpcRes === "number") {
@@ -229,6 +246,8 @@ export default defineTool({
       platform,
       post_content,
       image_url: final_image_url,
+      image_base64: final_image_base64,
+      image_mime_type: final_image_mime_type,
       scheduled_for: scheduleTime,
       status: data.status,
       created_at: data.created_at,
@@ -239,7 +258,8 @@ export default defineTool({
     });
 
     const label = platform === "x" ? "X (Twitter)" : "LinkedIn";
-    const imageNote = final_image_url ? " with your image" : "";
+    const hasImage = !!(final_image_url || final_image_base64);
+    const imageNote = hasImage ? " with your image attached" : "";
     return {
       content: [
         {
@@ -250,7 +270,7 @@ export default defineTool({
       structuredContent: {
         platform: label,
         status: "published",
-        has_image: !!final_image_url,
+        has_image: hasImage,
         remaining_quota: remainingQuota,
         tier: tier,
       },
