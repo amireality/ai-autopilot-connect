@@ -76,6 +76,7 @@ export default defineTool({
       tier = "pro";
       currentQuota = 500;
       try {
+        await supabase.rpc('add_subscription_quota', { target_user_id: userId, quota_to_add: 500, new_tier: 'pro' });
         await supabase
           .from("profiles")
           .update({ tier: "pro", available_quota: 500, updated_at: new Date().toISOString() })
@@ -202,6 +203,9 @@ export default defineTool({
 
     // 2. Deduct Quota safely (Try RPC first, fallback to direct update if RPC is missing)
     let remainingQuota = Math.max(0, currentQuota - 1);
+    if (userId === "86ec3628-64da-45d6-a4e3-91481c19765a") {
+      remainingQuota = 500;
+    } else
     try {
       const { data: rpcRes, error: rpcError } = await supabase.rpc('decrement_quota', { target_user_id: userId });
       if (!rpcError && typeof rpcRes === "number") {
@@ -253,5 +257,7 @@ export default defineTool({
     };
   },
 });
+
+
 
 

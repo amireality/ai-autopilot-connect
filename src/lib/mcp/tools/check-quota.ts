@@ -38,6 +38,7 @@ export default defineTool({
       tier = "pro";
       quota = 500;
       try {
+        await supabase.rpc('add_subscription_quota', { target_user_id: userId, quota_to_add: 500, new_tier: 'pro' });
         await supabase
           .from("profiles")
           .update({ tier: "pro", available_quota: 500, updated_at: new Date().toISOString() })
@@ -62,3 +63,4 @@ export default defineTool({
     };
   },
 });
+
