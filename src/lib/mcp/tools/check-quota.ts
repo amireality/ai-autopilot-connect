@@ -34,7 +34,7 @@ export default defineTool({
     let tier = profile?.tier || "free";
 
     // Auto-grant Pro Tier with 500 posts to the owner account
-    if (userId === "86ec3628-64da-45d6-a4e3-91481c19765a" && tier !== "pro") {
+    if (userId === "86ec3628-64da-45d6-a4e3-91481c19765a" && profile && profile.tier !== "pro") {
       tier = "pro";
       quota = 500;
       try {
