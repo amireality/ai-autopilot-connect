@@ -81,6 +81,63 @@ export default defineTool({
       };
     }
 
+    // 2. Verify connection on target platform BEFORE touching quota or storage
+    const platformLabel = platform === "x" ? "X (Twitter)" : "LinkedIn";
+    const { data: connection, error: connError } = await supabase
+      .from("social_connections")
+      .select("status, token_ciphertext, account_handle, token_expires_at")
+      .eq("user_id", userId)
+      .eq("platform", platform)
+      .maybeSingle();
+
+    if (!connection || connection.status !== "connected" || !connection.token_ciphertext) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `You have not connected your ${platformLabel} account yet.\n\n👉 Please connect your account first at https://blew.setupr.com/setup before publishing.\n\nNo posting quota was deducted (${currentQuota} posts remaining).`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    if (connection.token_expires_at && new Date(connection.token_expires_at).getTime() < Date.now()) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Your ${platformLabel} authorization has expired.\n\n👉 Please reconnect your account at https://blew.setupr.com/setup to refresh credentials.\n\nNo posting quota was deducted (${currentQuota} posts remaining).`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    let tokenData: { access_token?: string; person_urn?: string; refresh_token?: string } = {};
+    try {
+      tokenData = JSON.parse(connection.token_ciphertext);
+    } catch {
+      tokenData = { access_token: connection.token_ciphertext };
+    }
+
+    // LinkedIn fallback for person_urn if missing from stored payload
+    if (platform === "linkedin" && !tokenData.person_urn && tokenData.access_token) {
+      try {
+        const uRes = await fetch("https://api.linkedin.com/v2/userinfo", {
+          headers: { Authorization: `Bearer ${tokenData.access_token}` },
+        });
+        if (uRes.ok) {
+          const uJson = await uRes.json();
+          if (uJson.sub) {
+            tokenData.person_urn = `urn:li:person:${uJson.sub}`;
+          }
+        }
+      } catch (err) {
+        console.warn("LinkedIn userinfo fallback lookup failed:", err);
+      }
+    }
+
     let final_image_url = image_url || null;
 
     // Handle Image Upload if provided via base64
@@ -157,6 +214,10 @@ export default defineTool({
       scheduled_for: scheduleTime,
       status: data.status,
       created_at: data.created_at,
+      access_token: tokenData.access_token,
+      person_urn: tokenData.person_urn,
+      refresh_token: tokenData.refresh_token,
+      account_handle: connection.account_handle,
     });
 
     const label = platform === "x" ? "X" : "LinkedIn";
