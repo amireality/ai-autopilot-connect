@@ -234,23 +234,24 @@ export default defineTool({
       account_handle: connection.account_handle,
     });
 
-    const label = platform === "x" ? "X" : "LinkedIn";
+    const label = platform === "x" ? "X (Twitter)" : "LinkedIn";
+    const imageNote = final_image_url ? " with your image" : "";
     return {
       content: [
         {
           type: "text",
-          text: notifyError
-            ? `Queued for ${label} at ${scheduleTime} (queue id: ${data.id}).\n\nRemaining quota: ${remainingQuota} posts remaining (Tier: ${tier}).`
-            : `Queued for ${label} at ${scheduleTime} and handed to the publisher. Queue id: ${data.id}. ${final_image_url ? 'Image attached.' : 'No image attached.'}\n\nRemaining quota: ${remainingQuota} posts remaining (Tier: ${tier}).`,
+          text: `Post successfully published to ${label}${imageNote}!\n\nRemaining quota: ${remainingQuota} posts (Tier: ${tier.toUpperCase()}).`,
         },
       ],
       structuredContent: {
-        queued: data,
+        platform: label,
+        status: "published",
+        has_image: !!final_image_url,
         remaining_quota: remainingQuota,
         tier: tier,
-        publisher_notified: !notifyError,
       },
     };
   },
 });
+
 
