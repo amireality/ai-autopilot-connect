@@ -157,27 +157,25 @@ export default defineTool({
     let final_image_base64 = image_base64 || null;
     let final_image_mime_type = image_mime_type || null;
 
-    // Optional Supabase storage mirror if base64 exists but no URL was given
-    if (final_image_base64 && final_image_mime_type && !final_image_url) {
+    // Prefetch image_url at edge to guarantee zero-loss binary streaming and bypass host IP blocks (e.g. Imgur 429)
+    if (!final_image_base64 && image_url) {
       try {
-        const buffer = Buffer.from(final_image_base64, "base64");
-        const fileExtension = final_image_mime_type.split("/")[1] || "png";
-        const filename = `${ctx.getUserId()}_${Date.now()}.${fileExtension}`;
-
-        const { data: storageData, error: storageError } = await supabase
-          .storage
-          .from("social_images")
-          .upload(filename, buffer, {
-            contentType: final_image_mime_type,
-            upsert: false,
-          });
-
-        if (!storageError) {
-          const { data: publicUrlData } = supabase.storage.from("social_images").getPublicUrl(filename);
-          final_image_url = publicUrlData.publicUrl;
+        const imgFetch = await fetch(image_url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+          },
+        });
+        if (imgFetch.ok) {
+          const contentType = imgFetch.headers.get("content-type");
+          if (contentType && contentType.startsWith("image/")) {
+            final_image_mime_type = contentType.split(";")[0].trim();
+          }
+          const arrBuf = await imgFetch.arrayBuffer();
+          final_image_base64 = Buffer.from(arrBuf).toString("base64");
         }
       } catch (err) {
-        console.warn("Storage upload optional fallback error:", err);
+        console.warn("Failed to prefetch image_url to base64:", err);
       }
     }
 
