@@ -157,28 +157,6 @@ export default defineTool({
     let final_image_base64 = image_base64 || null;
     let final_image_mime_type = image_mime_type || null;
 
-    // Prefetch image_url to base64 at edge so the publisher worker never gets blocked by CDN/hosting rate limits
-    if (!final_image_base64 && image_url) {
-      try {
-        const imgFetch = await fetch(image_url, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-          },
-        });
-        if (imgFetch.ok) {
-          const contentType = imgFetch.headers.get("content-type");
-          if (contentType && contentType.startsWith("image/")) {
-            final_image_mime_type = contentType.split(";")[0].trim();
-          }
-          const arrBuf = await imgFetch.arrayBuffer();
-          final_image_base64 = Buffer.from(arrBuf).toString("base64");
-        }
-      } catch (err) {
-        console.warn("Failed to prefetch image_url to base64:", err);
-      }
-    }
-
     // Optional Supabase storage mirror if base64 exists but no URL was given
     if (final_image_base64 && final_image_mime_type && !final_image_url) {
       try {
@@ -203,7 +181,8 @@ export default defineTool({
       }
     }
 
-    const scheduleTime = scheduled_for ? new Date(scheduled_for).toISOString() : new Date().toISOString();
+    // Default immediate schedule timestamp to slightly in the past to prevent clock-skew delay
+    const scheduleTime = scheduled_for ? new Date(scheduled_for).toISOString() : new Date(Date.now() - 5000).toISOString();
 
     const { data, error } = await supabase
       .from("publishing_queue")
