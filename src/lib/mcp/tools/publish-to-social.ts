@@ -160,19 +160,32 @@ export default defineTool({
     // Prefetch image_url at edge to guarantee zero-loss binary streaming and bypass host IP blocks (e.g. Imgur 429)
     if (!final_image_base64 && image_url) {
       try {
-        const imgFetch = await fetch(image_url, {
+        let imgFetch = await fetch(image_url, {
           headers: {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
           },
         });
+        if (!imgFetch.ok) {
+          const proxyUrl = "https://imagecdn.app/v2/image/" + encodeURIComponent(image_url) + "?format=jpeg&quality=100";
+          imgFetch = await fetch(proxyUrl);
+        }
         if (imgFetch.ok) {
           const contentType = imgFetch.headers.get("content-type");
           if (contentType && contentType.startsWith("image/")) {
             final_image_mime_type = contentType.split(";")[0].trim();
           }
           const arrBuf = await imgFetch.arrayBuffer();
-          final_image_base64 = Buffer.from(arrBuf).toString("base64");
+          if (typeof Buffer !== "undefined") {
+            final_image_base64 = Buffer.from(arrBuf).toString("base64");
+          } else {
+            let binary = "";
+            const bytes = new Uint8Array(arrBuf);
+            for (let i = 0; i < bytes.byteLength; i++) {
+              binary += String.fromCharCode(bytes[i]);
+            }
+            final_image_base64 = btoa(binary);
+          }
         }
       } catch (err) {
         console.warn("Failed to prefetch image_url to base64:", err);
