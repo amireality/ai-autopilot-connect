@@ -117,7 +117,76 @@ export default defineTool({
       };
     }
 
-    if (connection.token_expires_at && new Date(connection.token_expires_at).getTime() < Date.now()) {
+    let tokenData: { access_token?: string; person_urn?: string; refresh_token?: string } = {};
+    try {
+      tokenData = JSON.parse(connection.token_ciphertext);
+    } catch {
+      tokenData = { access_token: connection.token_ciphertext };
+    }
+
+    // Dynamic auto-refresh for X (Twitter): access tokens expire after 2 hours, but refresh_token lasts 6 months
+    let isExpired = connection.token_expires_at ? new Date(connection.token_expires_at).getTime() <= Date.now() + 60000 : false;
+
+    if (platform === "x" && isExpired && tokenData.refresh_token) {
+      try {
+        const clientId = runtimeEnv("TWITTER_CLIENT_ID") || (typeof process !== "undefined" ? process.env?.["TWITTER_CLIENT_ID"] : undefined);
+        const clientSecret = runtimeEnv("TWITTER_CLIENT_SECRET") || (typeof process !== "undefined" ? process.env?.["TWITTER_CLIENT_SECRET"] : undefined);
+
+        if (clientId) {
+          const headers: Record<string, string> = {
+            "Content-Type": "application/x-www-form-urlencoded",
+          };
+          if (clientSecret) {
+            const basicAuth = typeof Buffer !== "undefined"
+              ? Buffer.from(`${clientId}:${clientSecret}`).toString("base64")
+              : btoa(`${clientId}:${clientSecret}`);
+            headers["Authorization"] = `Basic ${basicAuth}`;
+          }
+
+          const refreshRes = await fetch("https://api.twitter.com/2/oauth2/token", {
+            method: "POST",
+            headers,
+            body: new URLSearchParams({
+              grant_type: "refresh_token",
+              refresh_token: tokenData.refresh_token,
+              client_id: clientId,
+            }),
+          });
+
+          if (refreshRes.ok) {
+            const newTokens = await refreshRes.json();
+            if (newTokens.access_token) {
+              tokenData.access_token = newTokens.access_token;
+              if (newTokens.refresh_token) {
+                tokenData.refresh_token = newTokens.refresh_token;
+              }
+              const expiresIn = newTokens.expires_in || 7200;
+              const newExpiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
+
+              await supabase
+                .from("social_connections")
+                .update({
+                  token_ciphertext: JSON.stringify(tokenData),
+                  token_expires_at: newExpiresAt,
+                  updated_at: new Date().toISOString(),
+                  last_error: null,
+                })
+                .eq("user_id", userId)
+                .eq("platform", "x");
+
+              isExpired = false;
+            }
+          } else {
+            const errText = await refreshRes.text();
+            console.warn("Twitter token auto-refresh rejected by Twitter:", errText);
+          }
+        }
+      } catch (refreshErr) {
+        console.warn("Twitter token auto-refresh exception:", refreshErr);
+      }
+    }
+
+    if (isExpired) {
       return {
         content: [
           {
@@ -127,13 +196,6 @@ export default defineTool({
         ],
         isError: true,
       };
-    }
-
-    let tokenData: { access_token?: string; person_urn?: string; refresh_token?: string } = {};
-    try {
-      tokenData = JSON.parse(connection.token_ciphertext);
-    } catch {
-      tokenData = { access_token: connection.token_ciphertext };
     }
 
     // LinkedIn fallback for person_urn if missing from stored payload
