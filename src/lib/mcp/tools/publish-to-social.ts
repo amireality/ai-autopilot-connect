@@ -125,64 +125,114 @@ export default defineTool({
     }
 
     // Dynamic auto-refresh for X (Twitter): access tokens expire after 2 hours, but refresh_token lasts 6 months
-    let isExpired = connection.token_expires_at ? new Date(connection.token_expires_at).getTime() <= Date.now() + 60000 : false;
+    const tokenExpiresAtMs = connection.token_expires_at ? new Date(connection.token_expires_at).getTime() : 0;
+    // Expiring soon if within 10 minutes (600,000ms) or already past expiration or no expiration date stored
+    const isExpiringSoon = !tokenExpiresAtMs || tokenExpiresAtMs <= Date.now() + 10 * 60 * 1000;
+    let isExpired = !tokenExpiresAtMs || tokenExpiresAtMs <= Date.now();
 
-    if (platform === "x" && isExpired && tokenData.refresh_token) {
+    if (platform === "x" && isExpiringSoon && tokenData.refresh_token) {
+      let refreshed = false;
+
+      // 1. Primary path: Use server OAuth helper with admin privileges
       try {
-        const clientId = runtimeEnv("TWITTER_CLIENT_ID") || (typeof process !== "undefined" ? process.env?.["TWITTER_CLIENT_ID"] : undefined);
-        const clientSecret = runtimeEnv("TWITTER_CLIENT_SECRET") || (typeof process !== "undefined" ? process.env?.["TWITTER_CLIENT_SECRET"] : undefined);
+        const { refreshTwitterConnection } = await import("@/lib/oauth.server");
+        const res = await refreshTwitterConnection(userId, tokenData.refresh_token);
+        tokenData.access_token = res.access_token;
+        tokenData.refresh_token = res.refresh_token;
+        isExpired = false;
+        refreshed = true;
+      } catch (oauthErr) {
+        console.warn("Server refreshTwitterConnection not available or failed, falling back to inline refresh:", oauthErr);
+      }
 
-        if (clientId) {
-          const headers: Record<string, string> = {
-            "Content-Type": "application/x-www-form-urlencoded",
-          };
-          if (clientSecret) {
-            const basicAuth = typeof Buffer !== "undefined"
-              ? Buffer.from(`${clientId}:${clientSecret}`).toString("base64")
-              : btoa(`${clientId}:${clientSecret}`);
-            headers["Authorization"] = `Basic ${basicAuth}`;
-          }
+      // 2. Secondary fallback: Robust inline RFC 6749 OAuth 2.0 refresh
+      if (!refreshed) {
+        try {
+          const clientId =
+            runtimeEnv("TWITTER_CLIENT_ID") ||
+            (typeof process !== "undefined" ? process.env?.["TWITTER_CLIENT_ID"] : undefined);
+          const clientSecret =
+            runtimeEnv("TWITTER_CLIENT_SECRET") ||
+            (typeof process !== "undefined" ? process.env?.["TWITTER_CLIENT_SECRET"] : undefined);
 
-          const refreshRes = await fetch("https://api.twitter.com/2/oauth2/token", {
-            method: "POST",
-            headers,
-            body: new URLSearchParams({
+          if (clientId) {
+            const headers: Record<string, string> = {
+              "Content-Type": "application/x-www-form-urlencoded",
+            };
+            const bodyParams = new URLSearchParams({
               grant_type: "refresh_token",
               refresh_token: tokenData.refresh_token,
-              client_id: clientId,
-            }),
-          });
+            });
 
-          if (refreshRes.ok) {
-            const newTokens = await refreshRes.json();
-            if (newTokens.access_token) {
-              tokenData.access_token = newTokens.access_token;
-              if (newTokens.refresh_token) {
-                tokenData.refresh_token = newTokens.refresh_token;
-              }
-              const expiresIn = newTokens.expires_in || 7200;
-              const newExpiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
-
-              await supabase
-                .from("social_connections")
-                .update({
-                  token_ciphertext: JSON.stringify(tokenData),
-                  token_expires_at: newExpiresAt,
-                  updated_at: new Date().toISOString(),
-                  last_error: null,
-                })
-                .eq("user_id", userId)
-                .eq("platform", "x");
-
-              isExpired = false;
+            if (clientSecret) {
+              const basicAuth =
+                typeof Buffer !== "undefined"
+                  ? Buffer.from(`${clientId}:${clientSecret}`).toString("base64")
+                  : btoa(`${clientId}:${clientSecret}`);
+              headers["Authorization"] = `Basic ${basicAuth}`;
+              // STRICTLY DO NOT pass client_id in body when Authorization: Basic is present!
+            } else {
+              bodyParams.set("client_id", clientId);
             }
-          } else {
-            const errText = await refreshRes.text();
-            console.warn("Twitter token auto-refresh rejected by Twitter:", errText);
+
+            const refreshRes = await fetch("https://api.twitter.com/2/oauth2/token", {
+              method: "POST",
+              headers,
+              body: bodyParams,
+            });
+
+            if (refreshRes.ok) {
+              const newTokens = await refreshRes.json();
+              if (newTokens.access_token) {
+                tokenData.access_token = newTokens.access_token;
+                if (newTokens.refresh_token) {
+                  tokenData.refresh_token = newTokens.refresh_token;
+                }
+                const expiresIn = newTokens.expires_in || 7200;
+                const newExpiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
+
+                // Persist new tokens to Supabase (try supabaseAdmin first, fallback to user client)
+                try {
+                  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+                  await supabaseAdmin
+                    .from("social_connections")
+                    .update({
+                      token_ciphertext: JSON.stringify(tokenData),
+                      token_expires_at: newExpiresAt,
+                      updated_at: new Date().toISOString(),
+                      last_error: null,
+                    })
+                    .eq("user_id", userId)
+                    .eq("platform", "x");
+                } catch {
+                  await supabase
+                    .from("social_connections")
+                    .update({
+                      token_ciphertext: JSON.stringify(tokenData),
+                      token_expires_at: newExpiresAt,
+                      updated_at: new Date().toISOString(),
+                      last_error: null,
+                    })
+                    .eq("user_id", userId)
+                    .eq("platform", "x");
+                }
+
+                isExpired = false;
+                refreshed = true;
+              }
+            } else {
+              const errText = await refreshRes.text();
+              console.warn("Twitter token auto-refresh rejected by Twitter:", errText);
+            }
           }
+        } catch (refreshErr) {
+          console.warn("Twitter token auto-refresh exception:", refreshErr);
         }
-      } catch (refreshErr) {
-        console.warn("Twitter token auto-refresh exception:", refreshErr);
+      }
+
+      // If proactive refresh failed, but the existing token is still before expiration, let posting continue
+      if (!refreshed && tokenExpiresAtMs > Date.now()) {
+        isExpired = false;
       }
     }
 

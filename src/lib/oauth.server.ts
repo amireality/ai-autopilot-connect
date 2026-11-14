@@ -151,6 +151,79 @@ export async function handleTwitterCallback(code: string, stateStr: string): Pro
   return accountHandle;
 }
 
+export async function refreshTwitterConnection(
+  userId: string,
+  currentRefreshToken: string,
+): Promise<{ access_token: string; refresh_token: string; expires_in: number }> {
+  const clientId = process.env["TWITTER_CLIENT_ID"];
+  const clientSecret = process.env["TWITTER_CLIENT_SECRET"];
+
+  if (!clientId) {
+    throw new Error("TWITTER_CLIENT_ID is not configured in environment variables.");
+  }
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/x-www-form-urlencoded",
+  };
+
+  const bodyParams = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: currentRefreshToken,
+  });
+
+  if (clientSecret) {
+    // RFC 6749 Confidential Client:
+    // Credentials MUST be passed in the Authorization header.
+    // Twitter API v2 strictly rejects requests if client_id is in the body when Basic Auth is used!
+    const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+    headers["Authorization"] = `Basic ${basicAuth}`;
+  } else {
+    // Public Client (PKCE without secret): client_id is passed in the body
+    bodyParams.set("client_id", clientId);
+  }
+
+  const tokenResponse = await fetch("https://api.twitter.com/2/oauth2/token", {
+    method: "POST",
+    headers,
+    body: bodyParams,
+  });
+
+  if (!tokenResponse.ok) {
+    const errorText = await tokenResponse.text();
+    console.error("Twitter token refresh error:", errorText);
+    throw new Error(`Failed to refresh Twitter token: ${errorText}`);
+  }
+
+  const tokenData = await tokenResponse.json();
+  const accessToken = tokenData.access_token;
+  const refreshToken = tokenData.refresh_token || currentRefreshToken;
+  const expiresIn = tokenData.expires_in || 7200;
+
+  const tokenPayload = JSON.stringify({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  });
+
+  const { error: dbError } = await supabaseAdmin
+    .from("social_connections")
+    .update({
+      token_ciphertext: tokenPayload,
+      token_expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
+      updated_at: new Date().toISOString(),
+      last_error: null,
+    })
+    .eq("user_id", userId)
+    .eq("platform", "x");
+
+  if (dbError) {
+    console.error("Failed to update refreshed Twitter connection in DB:", dbError);
+    throw new Error(`Database error saving refreshed connection: ${dbError.message}`);
+  }
+
+  return { access_token: accessToken, refresh_token: refreshToken, expires_in: expiresIn };
+}
+
+
 // -------------------------------------------------------------
 // LinkedIn OAuth 2.0
 // -------------------------------------------------------------

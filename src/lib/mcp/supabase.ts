@@ -8,7 +8,11 @@ type RuntimeGlobals = typeof globalThis & {
 
 export function runtimeEnv(name: string): string | undefined {
   const runtime = globalThis as RuntimeGlobals;
-  return runtime.Deno?.env?.get?.(name) ?? runtime.process?.env?.[name];
+  const fromImportMeta =
+    typeof import.meta !== "undefined" && import.meta.env
+      ? (import.meta.env as unknown as Record<string, string | undefined>)[name]
+      : undefined;
+  return fromImportMeta ?? runtime.Deno?.env?.get?.(name) ?? runtime.process?.env?.[name];
 }
 
 function configuredEnv(names: readonly string[]): string | undefined {
